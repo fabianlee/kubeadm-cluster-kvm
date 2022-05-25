@@ -1,4 +1,6 @@
-## kubeadm on KVM with nginx ingress
+## kubeadm cluster on KVM with NGINX Ingress
+
+[Full blog article](https://fabianlee.org/2022/05/25/kvm-kubeadm-cluster-on-kvm-using-ansible/)
 
 Modify variables for environment:
   * vi group_vars/all
