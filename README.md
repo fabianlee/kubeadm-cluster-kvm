@@ -10,6 +10,13 @@ Modify any variables for environment:
 Install Prerequisites OS packages and pip modules for Ansible:
   * ./install_requirements.sh
 
+Create ssh keypair for guest VMs
+```
+cd tf-libvirt
+ssh-keygen -t rsa -b 4096 -f id_rsa -C tf-libvirt -N "" -q
+cd ..
+```
+
 Create local KVM guest VM instances:
   * ansible-playbook playbook_terraform_kvm.yml
 
