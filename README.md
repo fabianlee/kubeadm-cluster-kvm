@@ -2,7 +2,9 @@
 
 [Full blog article](https://fabianlee.org/2022/05/25/kvm-kubeadm-cluster-on-kvm-using-ansible/)
 
-Modify variables for environment:
+![kubeadm cluster](https://github.com/fabianlee/kubeadm-cluster-kvm/raw/main/diagrams/kubeadm-3node.png)
+
+Modify any variables for environment:
   * vi group_vars/all
 
 Install Prerequisites OS packages and pip modules for Ansible:
