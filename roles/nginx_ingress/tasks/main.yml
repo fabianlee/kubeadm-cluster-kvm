@@ -3,7 +3,7 @@
 - name: get nginx ingress manifest
   get_url:
     url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
-    dest: nginx-deploy.yaml
+    dest: ./nginx-deploy.yaml
     mode: '0666'
 
 - name: replace 'NodePort' with 'LoadBalancer'

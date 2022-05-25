@@ -7,6 +7,11 @@
     insertafter: EOF
   loop: "{{local_etc_hosts}}"
 
+- name: add metalLB entry to cloud-init master for /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{hostvars['localhost'].metal_lb_primary}}\t{{cert_domains_primary_ingress|first}}"
+    insertafter: EOF
 
 - name: check cloud-init master for /etc/hosts
   stat:
@@ -20,3 +25,10 @@
     insertafter: EOF
   when: cloudinit_existence.stat.exists
   loop: "{{local_etc_hosts}}"
+
+- name: add metalLB entry to cloud-init master for /etc/hosts
+  lineinfile:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+    line: "{{hostvars['localhost'].metal_lb_primary}}\t{{cert_domains_primary_ingress|first}}"
+    insertafter: EOF
+  when: cloudinit_existence.stat.exists

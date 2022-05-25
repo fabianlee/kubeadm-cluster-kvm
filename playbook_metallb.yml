@@ -15,10 +15,3 @@
   roles:
     # public LB endpoints managed by MetalLB
     - role: kubeadm-metallb
-
-    # nginx ingress
-    - role: add_primary_nginx_ingress
-
-    # deploys hello world app
-    - { role: golang-hello-world-web, do_second_ingress: false }
-

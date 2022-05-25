@@ -1,0 +1,8 @@
+---
+
+- hosts: control_plane
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: nginx_ingress
+

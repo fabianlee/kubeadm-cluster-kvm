@@ -7,10 +7,9 @@
     marker_begin: "BEGIN {{item}}"
     marker_end: "END {{item}}"
     insertbefore: "version: 2"
-    content: "        {{additional_nic[item].id}}:\n          {{ additional_nic[item].netplan | to_nice_yaml(indent=4) | indent(10) }}"
+    content: "        {{item}}:\n            {{ netplan_var | to_nice_yaml(indent=4) | indent(12) }}"
   loop:
-    - 0
-    #- 1 # only need a single additional NIC
+    - "{{ netplan_nic }}"
 
 - name: netplan generate
   command: netplan generate

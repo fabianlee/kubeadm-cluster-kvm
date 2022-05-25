@@ -19,15 +19,11 @@ master_ip: "{{ hostvars[groups['control_plane'][0]]['ansible_host'] | default(gr
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local']
 
-# place in /etc/hosts of each worker node
+# cluster nodes must see each other
 local_etc_hosts:
-  # cluster nodes must see each other
   - ip: 192.168.122.217
     fqdn: control1
   - ip: 192.168.122.218
     fqdn: worker1
   - ip: 192.168.122.219
     fqdn: worker2
-  # allows curl to MetalLB endpoints with proper host header
-  - ip: "{{metal_lb_prefix}}.145"
-    fqdn: kubeadm.local

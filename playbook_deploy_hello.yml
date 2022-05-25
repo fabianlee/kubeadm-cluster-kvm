@@ -1,0 +1,9 @@
+---
+
+- hosts: control_plane
+  gather_facts: no
+  become: yes
+  roles:
+    # deploys hello world app
+    - { role: golang-hello-world-web, do_second_ingress: false }
+
