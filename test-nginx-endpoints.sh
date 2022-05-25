@@ -1,6 +1,8 @@
 #!/bin/bash
 
-for h in k3s.local k3s-secondary.local; do
+domain=kubeadm.local
+
+for h in $domain; do
   nslookup -timeout=1 $h
   if [ $? -ne 0 ]; then
     echo "WARN are you sure $h is DNS resolvable? did you add it to /etc/hosts?"
@@ -13,7 +15,8 @@ while [ 1==1 ]; do
   timestamp=$(date +"%D %T")
   echo ""
   echo "$timestamp"
-  curl $curlopt https://k3s.local/myhello/
-  curl $curlopt https://k3s-secondary.local/myhello2/
+  set -x
+  curl $curlopt https://$domain/myhello/
+  set +x
   sleep 4
 done

@@ -3,8 +3,8 @@
 Modify variables for environment:
   * vi group_vars/all
 
-Install Prerequisites modules for Ansible:
-  * ansible-playbook install_dependencies.yml
+Install Prerequisites OS packages and pip modules for Ansible:
+  * ./install_requirements.sh
 
 Create local KVM guest VM instances:
   * ansible-playbook playbook_terraform_kvm.yml
@@ -28,7 +28,7 @@ Validate kubectl locally:
 
 Validate ingress locally:
   * add entries to local /etc/hosts
-    192.168.2.145 kubeadm.local
+    x.y.z.145 kubeadm.local
 
   * test nginx ingress
     ./test-nginx-endpoints.sh
