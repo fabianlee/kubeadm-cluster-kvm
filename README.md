@@ -1,6 +1,6 @@
 ## kubeadm cluster on KVM with NGINX Ingress
 
-[Full blog article](https://fabianlee.org/2022/05/25/kvm-kubeadm-cluster-on-kvm-using-ansible/)
+[Read full blog article here](https://fabianlee.org/2022/05/25/kvm-kubeadm-cluster-on-kvm-using-ansible/)
 
 ![kubeadm cluster](https://github.com/fabianlee/kubeadm-cluster-kvm/raw/main/diagrams/kubeadm-3node.png)
 
