@@ -15,8 +15,8 @@ Deploy kubeadm:
   * ansible-playbook playbook_kubeadm_workers.yml
 
 MetalLB with NGINX Ingress:
-  * ansible-playbook playbook_certs.yml
   * ansible-playbook playbook_metallb.yml
+  * ansible-playbook playbook_certs.yml
   * ansible-playbook playbook_nginx_ingress.yml 
 
 Hello World deployment:
