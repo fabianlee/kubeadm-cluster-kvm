@@ -28,7 +28,11 @@ Validate kubectl locally:
 
 Validate ingress locally:
   * add entries to local /etc/hosts
+```
     x.y.z.145 kubeadm.local
+```
 
-  * test nginx ingress
+  * test myhello deployment exposed via nginx ingress
+```
     ./test-nginx-endpoints.sh
+```
