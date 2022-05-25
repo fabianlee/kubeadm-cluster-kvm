@@ -1,0 +1,8 @@
+---
+
+- hosts: control_plane
+  become: yes
+  roles:
+    # create certs and load into cluster
+    - role: cert-with-ca
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default'] }

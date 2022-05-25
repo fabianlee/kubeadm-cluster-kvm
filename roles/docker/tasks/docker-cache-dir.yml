@@ -1,0 +1,57 @@
+---
+
+- name: ensure custom group exist to support permissions on docker cache directory
+  group:
+    name: "{{item}}"
+    state: present
+  loop:
+    - "{{default_docker_group}}"
+
+- name: has old docker cache directory
+  stat:
+    path: /var/lib/docker-bak
+  register: has_old_docker_cache
+
+- name: has new docker cache directory
+  stat:
+    path: "{{docker_cache_dir}}"
+  register: has_new_docker_cache
+
+- name: create new docker cache directory
+  block:
+
+    - name: stop docker service to work on directories
+      systemd:
+        name: docker
+        state: stopped
+        #daemon_reload: yes
+
+    - name: move old docker cache directory
+      command: mv /var/lib/docker /var/lib/docker-bak
+      when: not has_old_docker_cache.stat.exists
+
+    - name: create alternate docker cache directory
+      file: 
+        path: "{{docker_cache_dir}}/docker"
+        state: directory
+        mode: 0711
+        owner: docker
+        group: "{{default_docker_group}}"
+
+    - name: create symlink bak to /var/lib/docker
+      file:
+        src: "{{docker_cache_dir}}/docker"
+        dest: /var/lib/docker
+        state: link
+
+    - name: Restart docker service
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: output docker status
+      command: systemctl status docker --no-pager -l
+
+  when: not has_new_docker_cache.stat.exists
+
+

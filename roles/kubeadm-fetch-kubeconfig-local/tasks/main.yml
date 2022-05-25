@@ -1,0 +1,8 @@
+---
+
+- name: copy kubectl back to Ansible orchestration host
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: /tmp/kubeadm-kubeconfig
+    flat: yes
+

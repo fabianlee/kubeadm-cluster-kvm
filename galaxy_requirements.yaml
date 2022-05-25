@@ -1,0 +1,27 @@
+---
+collections:
+
+  # https://galaxy.ansible.com/community/kubernetes
+  # https://github.com/ansible-collections/community.kubernetes
+  - name: community.kubernetes
+    version: 2.0.1
+
+  # for creating CA and certificates
+  # https://galaxy.ansible.com/community/crypto
+  - name: community.crypto
+    #version: 1.9.11
+    version: 2.2.1
+
+  # https://galaxy.ansible.com/ansible/netcommon
+  - name: ansible.netcommon
+    version: 2.2.0
+
+  # pam_limits
+  # https://galaxy.ansible.com/community/general
+  - name: community.general
+    version: 3.4.0
+
+  # local libvirt
+  - name: community.libvirt
+    version: 1.0.2
+

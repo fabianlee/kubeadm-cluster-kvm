@@ -1,0 +1,10 @@
+.terraform
+terraform.tfstate*
+id_rsa*
+.terraform.lock.hcl
+*.backup
+*.hcl
+
+# generated from .j2
+terraform.tfvars
+

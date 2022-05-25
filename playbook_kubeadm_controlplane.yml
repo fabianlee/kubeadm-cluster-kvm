@@ -1,0 +1,9 @@
+---
+
+- hosts: control_plane
+  gather_facts: yes
+  become: yes
+  roles:
+    - kubeadm-controlplane
+    - tiny-tools-all-nodes
+    - kubeadm-fetch-kubeconfig-local

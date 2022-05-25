@@ -1,0 +1,11 @@
+---
+
+- hosts: kubeadm_cluster
+  gather_facts: yes
+  become: yes
+  roles:
+    - additional-netplan-ip
+    - kubeadm-prereq
+    - docker
+    - kubelet-kubeadm-apt
+    - k9s

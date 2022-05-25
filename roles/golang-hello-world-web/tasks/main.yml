@@ -1,0 +1,21 @@
+---
+
+- name: create file out of every jinja2 templates
+  template:
+    src: "{{item}}"
+    dest: "./{{ item | basename }}"
+  with_fileglob: "../templates/*"
+
+- name: apply deployment golang-hello-world-web
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    src: golang-hello-world-web.yaml
+    namespace: default
+
+- name: apply nginx ingress to golang-hello-world-web
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    src: golang-hello-world-web-on-nginx.yaml
+    namespace: default

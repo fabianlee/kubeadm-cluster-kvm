@@ -1,0 +1,40 @@
+---
+
+# get latest ansible role for installing microk8s
+- hosts: localhost
+  become: no
+  tasks:
+
+    - name: install required pip3 dependencies for ansible galaxy kubernetes modules
+      become: yes
+      pip:
+        name:
+        - kubernetes
+        - openshift
+        - pyyaml
+        executable: pip3
+
+    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters_ipaddr.html
+    # still required for 'ansible.netcommon' collection to work
+    - name: install local packages needed for ipaddr jinja2 filter
+      delegate_to: localhost
+      become: yes
+      apt:
+        pkg:
+        - python-netaddr
+        - python3-netaddr
+        state: present
+
+    # https://docs.ansible.com/ansible/latest/collections/community/libvirt/virt_net_module.html
+    # required for 'community.libvirt' collection to work
+    - name: install local packages needed for community.libvirt
+      delegate_to: localhost
+      become: yes
+      apt:
+        pkg:
+        - python3-libvirt
+        - python3-lxml
+        state: present
+
+
+

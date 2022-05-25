@@ -1,0 +1,30 @@
+#used for manual dpeloyments
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: golang-hello-world-web-service2
+  #namespace: default
+  annotations:
+    # matches ingress-class arg at: 
+    #   roles/add_secondary_ingress/templates/nginx-ingress-secondary-microk8s-controller.yaml.j2
+    kubernetes.io/ingress.class: secondary
+    # allows http without forcing redirect to ssl
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  tls:
+  - hosts: [ 'k3s-secondary.local' ]
+    # secret must be in same namespace
+    secretName: tls-secondary-credential
+  rules:
+
+  - host: k3s-secondary.local
+    http:
+      paths:
+      - pathType: Prefix #Exact
+        path: "/myhello2/"
+        backend:
+          service:
+            name: golang-hello-world-web-service2
+            port:
+              number: 8080
+

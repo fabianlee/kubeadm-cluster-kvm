@@ -1,0 +1,13 @@
+---
+
+- name: copy tiny-tools yaml to remote host
+  copy:
+    src: tiny-tools-daemonset.yaml
+    dest: .
+
+- name: apply nginx ingress to golang-hello-world-web
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    src: tiny-tools-daemonset.yaml
+    namespace: default

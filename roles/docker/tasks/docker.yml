@@ -1,0 +1,126 @@
+---
+
+- name: ensure docker group exists
+  group:
+    name: "{{item}}"
+    state: present
+  loop:
+    - "{{default_docker_group}}"
+
+- name: Create initial docker user so file ownership can have valid entry
+  user:
+    name: "{{default_docker_user}}"
+    group: "{{default_docker_group}}"
+    createhome: no
+    shell: /bin/bash
+    state: present
+
+# etc/apt/sources.list.d/docker-ppa.list will change because label change in ppa
+# it will need to be rewritten by apt to:
+# deb http://ppa.launchpad.net/cloud-images/docker1903-k8s/ubuntu bionic main
+- name: do apt update to fix issues with docker ppa changing label (apt-get will not fix)
+  command:
+      cmd: apt update -y
+  register: apt_result
+  failed_when: not apt_result.rc in [0,1]
+
+- name: remove any older docker packages, using apt to make sure apt-get is not used
+  apt:
+    name:
+      - docker
+      - docker-engine
+      - docker.io
+      - containerd
+      - runc
+    state: absent
+    update_cache: yes
+
+- name: Install dependent packages
+  package:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      # for group evaluation
+      - members
+    state: present
+    #update_cache: yes
+
+- name: is docker key already loaded into keyring
+  command: apt-key list --list-signatures
+  register: docker_signatures
+
+- name: get docker key, direct internet
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  args:
+    warn: no
+  when: not '8D81803C0EBFCD88' in docker_signatures.stdout
+
+- name: install fingerprint for docker
+  apt_key:
+    id: 08D81803C0EBFCD88
+    state: present
+
+- name: add docker apt repository to source list
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_lsb.codename|lower}} stable"
+    state: present
+    filename: docker
+    update_cache: yes
+    mode: 0644
+
+- name: create Docker config directory
+  file:
+    path: /etc/docker
+    state: directory
+
+- name: changing Docker to systemd driver expected by kubeadm, instead of default cgroupfs driver
+  copy:
+    dest: "/etc/docker/daemon.json"
+    content: |
+        {
+        "exec-opts": ["native.cgroupdriver=systemd"]
+        }
+
+- name: install docker packages
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+  register: docker_installed
+
+- name: move docker cache directory to {{docker_cache_dir}} if still in default location
+  include_tasks: docker-cache-dir.yml
+
+- name: create systemd dir for docker config
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: add insecure registry to docker
+  template:
+    src: docker.j2
+    dest: /etc/default/docker
+    
+- name: get all members of custom group
+  command: members {{docker_member_group}}
+  register: docker_members
+  failed_when: not docker_members.rc in [0,1]
+
+- name: add list of users to docker group so that sudo is unecessary
+  user:
+    name: "{{item}}"
+    groups: docker
+    append: yes
+  with_items: "{{ docker_members.stdout.split() }}"
+
+- name: check cgroup driver, which should be systemd to match expectation of kubeadm
+  shell:
+    cmd: docker info | grep -i cgroup
+  register: docker_cgroup
+- debug: msg="{{docker_cgroup.stdout_lines}}"

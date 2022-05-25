@@ -1,0 +1,8 @@
+---
+
+- name: docker service with custom cache directory
+  import_tasks: docker.yml
+  tags: docker
+  when: ansible_distribution_major_version|int >= 16
+
+

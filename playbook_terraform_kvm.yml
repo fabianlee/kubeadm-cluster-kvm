@@ -1,0 +1,18 @@
+---
+
+# put MetalLB as peer on host network
+- hosts: localhost
+  connection: local
+  tasks:
+    - set_fact:
+        metal_lb_prefix: "{{ ansible_default_ipv4.address.split('.')[:3]|join('.') }}"
+    - set_fact:
+        metal_lb_primary: "{{metal_lb_prefix}}.145"
+
+# create kvm guest vms
+- hosts: localhost
+  gather_facts: yes
+  become: no
+
+  roles:
+     - role: terraform_create_kvm_hosts

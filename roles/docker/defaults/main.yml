@@ -1,0 +1,12 @@
+---
+insecure_registry: []
+
+default_docker_group: docker
+default_docker_user: docker
+
+# add users to 'docker' group so they do not have to use sudo
+# use comma separated list, makes it easier to process in task
+docker_member_group: ""
+
+# new location of docker cache
+docker_cache_dir: /docker-cache

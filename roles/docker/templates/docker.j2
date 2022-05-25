@@ -1,0 +1,7 @@
+# ansible generated - do not edit manually
+# /etc/default/docker
+{% if insecure_registry|length>0 %}
+DOCKER_OPTS="{% for registry in insecure_registry %}--insecure-registry {{registry}} {% endfor %}"
+{% else %}
+DOCKER_OPTS=
+{% endif %}

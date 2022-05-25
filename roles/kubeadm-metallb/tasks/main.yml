@@ -1,0 +1,41 @@
+---
+
+- name: create metallb ns
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    name: metallb-system
+    kind: Namespace
+
+- debug: msg="{{hostvars['localhost'].metal_lb_primary}}"
+
+- name: create metallb configmap
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: metallb-system
+        name: config
+      data:
+        config: |
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - "{{hostvars['localhost'].metal_lb_primary}}"
+
+
+- name: copy metallb yaml to remote host
+  copy:
+    src: metallb.yaml
+    dest: .
+
+- name: apply MetalLB main manifest
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{KUBECONFIG}}"
+    src: metallb.yaml
+

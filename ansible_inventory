@@ -1,0 +1,24 @@
+# aliases
+control1 ansible_host=192.168.122.217
+worker1 ansible_host=192.168.122.218
+worker2 ansible_host=192.168.122.219
+
+[control_plane]
+control1
+
+[workers]
+worker1
+worker2
+
+[kubeadm_cluster:children]
+control_plane
+workers
+
+# additional NIC added for loadbalancer
+[metalLB]
+control1
+
+[all:vars]
+ansible_user=ubuntu
+#ansible_ssh_pass=*****
+ansible_ssh_private_key_file = tf-libvirt/id_rsa

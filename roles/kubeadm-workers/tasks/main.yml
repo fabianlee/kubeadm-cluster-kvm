@@ -1,0 +1,7 @@
+---
+
+- name: join cluster
+  shell:
+    cmd: "{{ hostvars['control1'].join_command }} >> node_joined.log"
+  args:
+    creates: node_joined.log

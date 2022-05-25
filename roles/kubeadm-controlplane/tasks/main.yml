@@ -1,0 +1,31 @@
+---
+
+- name: initialize kubeadm cluster
+  shell:
+    cmd: kubeadm init --pod-network-cidr={{pod_cidr}} --service-cidr={{service_cidr}} --apiserver-advertise-address={{master_ip}} >> cluster_initialized.txt 2>&1
+  args:
+    chdir: $HOME
+    creates: cluster_initialized.txt
+
+- name: create .kube directory
+  become_user: ubuntu
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: copy admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+
+# this enables RBAC on newer versions (do not need k8s-manifests/kube-flannel-rbac.yml)
+# flanneld located at '/opt/cni/bin' for kubeadm (and not '/opt/bin')
+- name: install Pod network
+  become_user: ubuntu
+  shell: 
+    cmd: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> kube-flannel.log
+  args:
+    creates: kube-flannel.log
