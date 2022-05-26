@@ -25,7 +25,7 @@ cd ..
   * ansible-playbook playbook_kubeadm_controlplane.yml
   * ansible-playbook playbook_kubeadm_workers.yml
 
-wait for all pods to be ready
+wait for all pods to be 'Running'
 ```
 export KUBECONFIG=/tmp/kubeadm-kubeconfig
 kubectl get pods -A
@@ -36,7 +36,7 @@ kubectl get pods -A
   * ansible-playbook playbook_certs.yml
   * ansible-playbook playbook_nginx_ingress.yml 
 
-wait for NGINX Ingress to have its IP address:
+wait for NGINX Ingress
 ```
 # admission to be 'Completed', controller 'Running'
 kubectl get pods -n ingress-nginx
@@ -48,7 +48,7 @@ kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.sta
 ### Hello World deployment
   * ansible-playbook playbook_deploy_myhello.yml
 
-wait for deployment to be ready
+wait for deployment to be Ready 1/1
 ```
 kubectl get deployment golang-hello-world-web -n default
 ```
@@ -57,12 +57,13 @@ kubectl get deployment golang-hello-world-web -n default
 ### Validate deployment at Ingress
   * test myhello deployment exposed via NGINX Ingress
 ```
-# replace 'x.y.z' with your host network prefix, e.g. 192.168.1
+# replace with your host network prefix, e.g. 192.168.1
+host_net_prefix=x.y.z
 
 # test without needing DNS
-curl -k --resolve kubeadm.local:443:x.y.z.145 https://kubeadm.local:443/myhello/
+curl -k --resolve kubeadm.local:443:${host_net_prefix}.145 https://kubeadm.local:443/myhello/
 
 # test by adding DNS to local hosts file
-echo x.y.z.145 kubeadm.local | sudo tee -a /etc/hosts
+echo ${host_net_prefix}.145 kubeadm.local | sudo tee -a /etc/hosts
 curl -k https://kubeadm.local/myhello/
 ```
