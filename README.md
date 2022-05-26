@@ -38,6 +38,10 @@ kubectl get pods -A
 
 wait for NGINX Ingress to have its IP address:
 ```
+# admission to be 'Completed', controller 'Running'
+kubectl get pods -n ingress-nginx
+
+# wait for Ingress to be provided IP address by MetalLB
 kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress}"
 ```
 

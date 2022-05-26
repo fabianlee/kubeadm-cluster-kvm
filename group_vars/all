@@ -10,7 +10,7 @@ kubeadm_version: 1.23
 use_containerd: false
 
 # internal CIDR block ranges for pods and clusters
-pod_cidr: 10.245.0.0/16
+pod_cidr: 10.245.0.0/16 # flannel default is 10.244.0.0/16
 service_cidr: 10.249.0.0/16
 
 # IP adress of 'control1' the kubeadm master

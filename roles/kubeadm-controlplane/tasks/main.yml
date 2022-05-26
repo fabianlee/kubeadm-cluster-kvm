@@ -21,11 +21,14 @@
     remote_src: yes
     owner: ubuntu
 
-# this enables RBAC on newer versions (do not need k8s-manifests/kube-flannel-rbac.yml)
 # flanneld located at '/opt/cni/bin' for kubeadm (and not '/opt/bin')
+# do not need k8s-manifests/kube-flannel-rbac.yml in newer versions
+- name: get flannel manifest, use our own pod CIDR block instead of default which ends up in configmap kube-system/kube-flannel-cfg
+  shell: curl -fsSL https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed 's#10.244.0.0/16#{{pod_cidr}}#' > kube-flannel.yml
+
 - name: install Pod network
   become_user: ubuntu
   shell: 
-    cmd: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> kube-flannel.log
+    cmd: kubectl apply -f kube-flannel.yml >> kube-flannel.log
   args:
     creates: kube-flannel.log
