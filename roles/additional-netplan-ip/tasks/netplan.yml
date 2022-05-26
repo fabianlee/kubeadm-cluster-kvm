@@ -7,9 +7,8 @@
     marker_begin: "BEGIN {{item}}"
     marker_end: "END {{item}}"
     insertbefore: "version: 2"
-    content: "        {{item}}:\n            {{ netplan_var | to_nice_yaml(indent=4) | indent(12) }}"
-  loop:
-    - "{{ netplan_nic }}"
+    content: "        {{item}}:\n            {{ additional_nic[item] | to_nice_yaml(indent=4) | indent(12) }}"
+  with_items: "{{ additional_nic.keys() | list }}"
 
 - name: netplan generate
   command: netplan generate

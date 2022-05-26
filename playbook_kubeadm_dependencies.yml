@@ -13,16 +13,17 @@
   gather_facts: yes
   become: yes
   vars:
-    netplan_nic: ens4
-    netplan_var:
-      addresses: ["{{hostvars['localhost'].metal_lb_primary}}/24"]
-      dhcp4: false
-      gateway4: "{{hostvars['localhost'].metal_lb_prefix}}.1"
-      nameservers:
-        addresses:
-        - "{{hostvars['localhost'].metal_lb_prefix}}.1"
-        search:
-        - home.lab
+    # define each NIC for netplan here
+    additional_nic:
+      ens4:
+        addresses: ["{{hostvars['localhost'].metal_lb_primary}}/24"]
+        dhcp4: false
+        gateway4: "{{hostvars['localhost'].metal_lb_prefix}}.1"
+        nameservers:
+          addresses:
+          - "{{hostvars['localhost'].metal_lb_prefix}}.1"
+          search:
+          - home.lab
 
   roles:
     - additional-netplan-ip
