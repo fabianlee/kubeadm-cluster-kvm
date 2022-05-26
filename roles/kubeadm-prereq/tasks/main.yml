@@ -168,7 +168,7 @@
   ufw: rule=allow port={{item}} proto=tcp
   loop:
     - "10250" # kubelet API
-    # "30000-32767" # nodeport services
+    - "30000:32767" # nodeport services range
   when: "'workers' in group_names"
 
 
