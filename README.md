@@ -62,5 +62,5 @@ kubectl get deployment golang-hello-world-web -n default
 
   * test myhello deployment exposed via NGINX Ingress
 ```
-curl https://kubeadm.local/myhello/
+curl -k https://kubeadm.local/myhello/
 ```
