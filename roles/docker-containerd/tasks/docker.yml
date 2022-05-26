@@ -1,5 +1,13 @@
 ---
 
+- name: Enable the kernel modules for containerd
+  community.general.modprobe:
+    name: "{{item}}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
 - name: ensure docker group exists
   group:
     name: "{{item}}"
@@ -41,6 +49,7 @@
       - apt-transport-https
       - ca-certificates
       - curl
+      - gnupg2
       - gnupg-agent
       - software-properties-common
       # for group evaluation
@@ -81,10 +90,15 @@
     dest: "/etc/docker/daemon.json"
     content: |
         {
-        "exec-opts": ["native.cgroupdriver=systemd"]
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10m"
+        },
+        "storage-driver": "overlay2"
         }
 
-- name: install docker packages
+- name: install docker and containerd packages
   package:
     name:
       - docker-ce
@@ -93,6 +107,46 @@
     state: present
     update_cache: yes
   register: docker_installed
+
+- name: create config dir for containerd
+  file:
+    path: /etc/containerd
+    state: directory
+- name: touch containerd config
+  file:
+    path: /etc/containerd/config.toml
+    state: touch
+
+- name: count how many times plugin is found in containerd config, low count means we need to recreate config
+  shell:
+    cmd: grep -c plugins /etc/containerd/config.toml
+  register: plugins_count
+#- debug: msg="{{plugins_count}}"
+
+- name: create fully formed config.toml for containerd if plugin count is low
+  shell:
+    cmd: containerd config default > /etc/containerd/config.toml
+  when: (plugins_count.stdout|int) < 4
+  register: config_toml_res
+
+- name: containerd, set SystemdCgroup to true
+  replace:
+    path: /etc/containerd/config.toml
+    regexp: '(\s*)SystemdCgroup = false'
+    replace: '\1SystemdCgroup = true'
+  when: config_toml_res is defined and config_toml_res.changed
+- name: containerd, set disabled_plugins to empty array
+  replace:
+    path: /etc/containerd/config.toml
+    regexp: '^disabled_plugins.*'
+    replace: 'disabled_plugins = []'
+  when: config_toml_res is defined and config_toml_res.changed
+
+- name: Restart containerd service
+  systemd:
+    name: containerd
+    state: restarted
+
 
 - name: move docker cache directory to {{docker_cache_dir}} if still in default location
   include_tasks: docker-cache-dir.yml

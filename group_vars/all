@@ -6,7 +6,8 @@ users: ['ubuntu'] # 'ubuntu' for kvm/libvirt
 
 # major.minor version for apt install of utilities
 # 1.23 is compatible with Docker, 1.24 will require containerd
-kubeadm_version: 1.23
+kubeadm_version: 1.24 # 1.23 will work with docker, 1.24 requires containerd
+#container_runtime: docker # docker|cri
 
 # internal CIDR block ranges for pods and clusters
 pod_cidr: 10.245.0.0/16
@@ -16,7 +17,7 @@ service_cidr: 10.249.0.0/16
 master_ip: "{{ hostvars[groups['control_plane'][0]]['ansible_host'] | default(groups['control_plane'][0]) }}"
 
 # last octet of IP address that MetalLB will allocate
-metal_lb_octet: 245
+metal_lb_octet: 145
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local

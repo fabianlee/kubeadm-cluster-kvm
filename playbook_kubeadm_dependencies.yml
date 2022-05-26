@@ -27,6 +27,6 @@
     - additional-netplan-ip
     - local-etc-hosts
     - kubeadm-prereq
-    - docker
+    - docker-containerd
     - kubelet-kubeadm-apt
     - k9s

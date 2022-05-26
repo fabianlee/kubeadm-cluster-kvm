@@ -26,6 +26,27 @@
     state: present
     reload: yes
 
+- name: Enable the kernel modules for containerd, must happen before setting bridge sysctl settings
+  community.general.modprobe:
+    name: "{{item}}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+# https://computingforgeeks.com/deploy-kubernetes-cluster-on-ubuntu-with-kubeadm/
+- name: containerd required sysctl settings
+  sysctl:
+    name: "{{item}}"
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: yes
+  loop:
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.bridge.bridge-nf-call-iptables
+
+
 - name: install list of packages, debian based
   apt:
     pkg:
@@ -152,8 +173,21 @@
       export EDITOR=vim
       export VISUAL=vim
 
-- name: open ufw port for kubeadm controlplane/worker communication
+# https://www.fosstechnix.com/how-to-install-kubernetes-cluster-on-ubuntu/
+- name: open ufw port for kubeadm controlplane
   ufw: rule=allow port={{item}} proto=tcp
   loop:
-    - "6443"
-#    - "443"
+    - "6443" # kubernetes API
+    - "2379" # etcd
+    - "2380" # etcd
+    - "10250" # kubelet API
+    - "10251" # kube-scheduler
+    - "10252" # kube-contoller-manager
+  when: "'control_plane' in group_names"
+
+- name: open ufw port for kubeadm workers
+  ufw: rule=allow port={{item}} proto=tcp
+  loop:
+    - "10250" # kubelet API
+    # "30000-32767" # nodeport services
+  when: "'workers' in group_names"

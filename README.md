@@ -36,6 +36,7 @@ Hello World deployment:
 Validate kubectl locally:
   * export KUBECONFIG=/tmp/kubeadm-kubeconfig
   * kubectl get services -A
+  * kubectl get pods -A
 
 Validate ingress locally:
   * add entries to local /etc/hosts

@@ -9,6 +9,15 @@
 
 - debug: msg="{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}"
 
+# https://github.com/metallb/metallb/issues/888
+# https://devopslearning.medium.com/metallb-load-balancer-for-bare-metal-kubernetes-43686aa0724f
+- name: create metallb memberlist secret that is missing from newer docs
+  shell:
+    cmd: 'kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"'
+  environment:
+    KUBECONFIG: "{{KUBECONFIG}}"
+
+
 # https://metallb.universe.tf/configuration/
 - name: create metallb configmap
   kubernetes.core.k8s:
