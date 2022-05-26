@@ -5,7 +5,7 @@
     src: tiny-tools-daemonset.yaml
     dest: .
 
-- name: apply nginx ingress to golang-hello-world-web
+- name: apply tiny-tools daemonset
   kubernetes.core.k8s:
     state: present
     kubeconfig: "{{KUBECONFIG}}"
