@@ -25,26 +25,35 @@ Deploy kubeadm:
   * ansible-playbook playbook_kubeadm_controlplane.yml
   * ansible-playbook playbook_kubeadm_workers.yml
 
+Wait for all pods to be ready:
+
+```
+export KUBECONFIG=/tmp/kubeadm-kubeconfig
+kubectl get pods -A
+```
+
 MetalLB with NGINX Ingress:
   * ansible-playbook playbook_metallb.yml
   * ansible-playbook playbook_certs.yml
   * ansible-playbook playbook_nginx_ingress.yml 
 
+Wait for NGINX Ingress to have its IP address:
+
+```
+kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress}"
+```
+
 Hello World deployment:
   * ansible-playbook playbook_deploy_myhello.yml
 
-Validate kubectl locally:
-  * export KUBECONFIG=/tmp/kubeadm-kubeconfig
-  * kubectl get services -A
-  * kubectl get pods -A
 
 Validate ingress locally:
-  * add entries to local /etc/hosts
+  * add entry to local /etc/hosts
 ```
     x.y.z.145 kubeadm.local
 ```
 
-  * test myhello deployment exposed via nginx ingress
+  * test myhello deployment exposed via NGINX Ingress
 ```
-    ./test-nginx-endpoints.sh
+curl https://kubeadm.local/myhello/
 ```
