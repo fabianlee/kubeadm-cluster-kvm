@@ -6,8 +6,6 @@
   tasks:
     - set_fact:
         metal_lb_prefix: "{{ ansible_default_ipv4.address.split('.')[:3]|join('.') }}"
-    - set_fact:
-        metal_lb_primary: "{{metal_lb_prefix}}.145"
 
 - hosts: control_plane
   gather_facts: yes

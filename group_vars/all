@@ -15,15 +15,19 @@ service_cidr: 10.249.0.0/16
 # IP adress of 'control1' the kubeadm master
 master_ip: "{{ hostvars[groups['control_plane'][0]]['ansible_host'] | default(groups['control_plane'][0]) }}"
 
+# last octet of IP address that MetalLB will allocate
+metal_lb_octet: 245
+
 # for SAN certificate with custom CA
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local']
 
 # cluster nodes must see each other
+kvm_default_network: 192.168.122
 local_etc_hosts:
-  - ip: 192.168.122.217
+  - ip: "{{kvm_default_network}}.217"
     fqdn: control1
-  - ip: 192.168.122.218
+  - ip: "{{kvm_default_network}}.218"
     fqdn: worker1
-  - ip: 192.168.122.219
+  - ip: "{{kvm_default_network}}.219"
     fqdn: worker2

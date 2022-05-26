@@ -1,2 +1,2 @@
 # override values from variables.tf
-additional_nic1 = "{{metal_lb_primary}}"
+additional_nic1 = "{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}"
