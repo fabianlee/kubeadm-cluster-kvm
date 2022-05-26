@@ -55,12 +55,12 @@ kubectl get deployment golang-hello-world-web -n default
 
 
 ### Validate deployment at Ingress
-  * add entry to local /etc/hosts
-```
-    x.y.z.145 kubeadm.local
-```
-
   * test myhello deployment exposed via NGINX Ingress
 ```
+# test without needing DNS
+curl -k --resolve kubeadm.local:443:192.168.2.145 https://kubeadm.local:443/myhello/
+
+# test by adding DNS to local hosts file
+echo x.y.z.145 kubeadm.local | sudo tee -a /etc/hosts
 curl -k https://kubeadm.local/myhello/
 ```

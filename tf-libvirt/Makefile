@@ -48,6 +48,7 @@ virsh-create-snapshot:
 	virsh snapshot-create-as worker1-192.168.122.218 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
 	virsh snapshot-create-as worker2-192.168.122.219 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
 
+## reverting by doing internal snapshot deletion
 virsh-snapshot-delete:
 	virsh destroy control1-192.168.122.217
 	virsh destroy worker1-192.168.122.218
