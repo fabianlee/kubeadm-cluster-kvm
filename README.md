@@ -46,7 +46,7 @@ kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.sta
 
 wait for deployment to be ready
 ```
-kubectl get deployment -n default
+kubectl get deployment golang-hello-world-web -n default
 ```
 
 
