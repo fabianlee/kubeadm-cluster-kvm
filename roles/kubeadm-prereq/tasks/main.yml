@@ -26,27 +26,6 @@
     state: present
     reload: yes
 
-- name: Enable the kernel modules for containerd, must happen before setting bridge sysctl settings
-  community.general.modprobe:
-    name: "{{item}}"
-    state: present
-  loop:
-    - overlay
-    - br_netfilter
-
-# https://computingforgeeks.com/deploy-kubernetes-cluster-on-ubuntu-with-kubeadm/
-- name: containerd required sysctl settings
-  sysctl:
-    name: "{{item}}"
-    value: '1'
-    sysctl_set: true
-    state: present
-    reload: yes
-  loop:
-    - net.bridge.bridge-nf-call-ip6tables
-    - net.bridge.bridge-nf-call-iptables
-
-
 - name: install list of packages, debian based
   apt:
     pkg:
@@ -191,3 +170,28 @@
     - "10250" # kubelet API
     # "30000-32767" # nodeport services
   when: "'workers' in group_names"
+
+
+- name: CONTAINERD BLOCK
+  block:
+    - name: Enable the kernel modules for containerd, must happen before setting bridge sysctl settings
+      community.general.modprobe:
+        name: "{{item}}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+    
+    # https://computingforgeeks.com/deploy-kubernetes-cluster-on-ubuntu-with-kubeadm/
+    - name: containerd required sysctl settings
+      sysctl:
+        name: "{{item}}"
+        value: '1'
+        sysctl_set: true
+        state: present
+        reload: yes
+      loop:
+        - net.bridge.bridge-nf-call-ip6tables
+        - net.bridge.bridge-nf-call-iptables
+
+  when: use_containerd
