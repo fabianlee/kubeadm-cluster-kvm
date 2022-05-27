@@ -1,21 +1,5 @@
 ---
 
-# DO NOT NEED
-# using 'cert_overwrite' flag to control logic
-#
-#- name: find all existing key and certs
-#  find:
-#    path: "{{TMPDIR}}"
-#    file_type: file
-#    patterns: "{{cert_domains_list | first}}.*"
-#  register: old_cert_key
-#- name: remove old key and cert if cert_overwrite flag
-#  file:
-#    state: absent
-#    path: "{{ item.path }}"
-#  loop: "{{ old_cert_key.files }}"
-#  when: "{{ cert_overwrite }}"
-
 - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
   community.crypto.openssl_privatekey:
     path: "{{TMPDIR}}/{{cert_domains_list | first}}.key"
