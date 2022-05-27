@@ -1,7 +1,7 @@
 TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
 
-tls_secret_overwrite: true
+tls_secret_overwrite: false
 
-secret_namespace_list: [ 'default'] #,'nginx-ns','ingress-nginx','hello-app-ns','istio-system' ]
+secret_namespace_list: [ 'default'] #,'nginx-ns','ingress-nginx']
 
 KUBECONFIG: /etc/kubernetes/admin.conf
