@@ -44,4 +44,5 @@
 - debug: msg="ok"
   loop: "{{create_result.results}}"
   loop_control:
-    label: "{{item.stdout}}"
+    label: "{{item.stdout|default('')}}"
+  when: create_result.results is defined
