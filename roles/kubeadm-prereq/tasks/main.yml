@@ -40,6 +40,7 @@
     - netcat
     - traceroute
     - python-is-python3
+    - nfs-common # for NFS storageclass
     state: present
     update_cache: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
