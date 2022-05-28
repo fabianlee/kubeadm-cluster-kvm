@@ -28,6 +28,9 @@ menu_items=(
   ""
   "hello,Deploy hello world service"
   "curl,Validate exposed hello service using curl to LB Ingress"
+  ""
+  "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
+  "nfs-client,Install nfs external provisioner and storageclass"
 )
 
 function showMenu() {
@@ -257,6 +260,23 @@ while [ 1 == 1 ]; do
       echo "load balancer IP: $lb_ip"
       set -x
       curl -k --resolve kubeadm.local:443:${lb_ip} https://kubeadm.local:443/myhello/
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    nfs-host)
+      set -x
+      prereq/create_host_nfs.sh
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    nfs-client)
+      set -x
+      ansible-playbook playbook_nfs_helm_sc.yml
       retVal=$?
       set +x 
 
