@@ -32,6 +32,7 @@ menu_items=(
   "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
   "nfs-client,Install nfs external provisioner and storageclass"
   ""
+  "mailhog,Deploy in-cluster SMTP server for mail alerts"
   "prometheus,Deploy open-source kube-prometheus-stack"
 )
 
@@ -285,7 +286,14 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    mailhog)
+      set -x
+      ansible-playbook playbook_mailhog.yml
+      retVal=$?
+      set +x 
 
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
     prometheus)
       set -x
       ansible-playbook playbook_prometheus_helm.yml

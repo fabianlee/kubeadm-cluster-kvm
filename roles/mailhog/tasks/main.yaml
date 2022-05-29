@@ -1,0 +1,21 @@
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+---
+# helm repo add codecentric https://codecentric.github.io/helm-charts
+# helm show values codecentric/mailhog
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add codecentric repo
+  kubernetes.core.helm_repository:
+    name: codecentric
+    repo_url: https://codecentric.github.io/helm-charts
+
+#helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+- name: Deploy mailhog
+  kubernetes.core.helm:
+    name: mailhog
+    chart_ref: codecentric/mailhog
+    wait: false
+    values: "{{ lookup('template', role_path + '/templates/values.yaml') | from_yaml }}"
+    release_namespace: email
+    create_namespace: true
+

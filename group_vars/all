@@ -21,7 +21,7 @@ metal_lb_octet: 145
 
 # for SAN certificate with custom CA
 cert_CA: myCA.local
-cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local']
+cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local','mailhog.kubedm.local']
 
 # cluster nodes must see each other
 kvm_default_network: 192.168.122
