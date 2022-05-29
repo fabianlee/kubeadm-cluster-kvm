@@ -18,7 +18,7 @@
     name: prom-stack
     chart_ref: prometheus-community/kube-prometheus-stack
     wait: false
-    values: "{{ lookup('template', role_path + '/templates/prom-stack.yaml') | from_yaml }}"
+    values: "{{ lookup('template', role_path + '/templates/prom-sparse-' + prometheus_ingress_at + '.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
 

@@ -1,0 +1,62 @@
+
+alertmanager:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['alertmanager.{{ cert_domains_list | first }}']
+    paths: ['/']
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - alertmanager.{{ cert_domains_list | first }}
+
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    externalUrl: https://alertmanager.{{ cert_domains_list | first }}/
+    routePrefix: /
+
+grafana:
+  # username is 'admin'
+  adminPassword: prom-operator
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['grafana.{{ cert_domains_list | first }}']
+    path: "/"
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - grafana.{{ cert_domains_list | first }}
+
+prometheus:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['prometheus.{{ cert_domains_list | first }}']
+    paths: ['/']
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - prometheus.{{ cert_domains_list | first }}
+
+  prometheusSpec:
+    externalUrl: "https://prometheus.{{ cert_domains_list | first }}/prometheus"
+    routePrefix: /prometheus
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi

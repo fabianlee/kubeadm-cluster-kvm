@@ -1,0 +1,7 @@
+
+storage_class: nfs-client
+
+# 'atroo' means apps will be found at /
+# 'atcontext' means apps will be found at /grafana, /alertmanager, /prometheus
+prometheus_ingress_at: atcontext
+

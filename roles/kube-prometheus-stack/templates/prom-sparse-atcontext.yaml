@@ -1,0 +1,68 @@
+
+alertmanager:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts: ['alertmanager.{{ cert_domains_list | first }}']
+    paths: ['/alertmanager(/|$)(.*)']
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - alertmanager.{{ cert_domains_list | first }}
+
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    externalUrl: https://alertmanager.{{ cert_domains_list | first }}/alertmanager
+    routePrefix: /
+
+grafana:
+  # required to get path to work
+  env:
+    GF_SERVER_ROOT_URL: https://grafana.{{ cert_domains_list | first }}/grafana
+    GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+  # username is 'admin'
+  adminPassword: prom-operator
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts: ['grafana.{{ cert_domains_list | first }}']
+    path: "/grafana(/|$)(.*)"
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - grafana.{{ cert_domains_list | first }}
+
+prometheus:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: ['prometheus.{{ cert_domains_list | first }}']
+    paths: ['/prometheus/'] # does not need regex capture like others
+    tls:
+    - secretName: tls-credential
+      hosts:
+      - prometheus.{{ cert_domains_list | first }}
+
+  prometheusSpec:
+    externalUrl: "https://prometheus.{{ cert_domains_list | first }}/prometheus"
+    routePrefix: /prometheus
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {{storage_class}}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
