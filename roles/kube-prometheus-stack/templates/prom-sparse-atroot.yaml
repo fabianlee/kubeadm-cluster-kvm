@@ -7,7 +7,7 @@ alertmanager:
     hosts: ['alertmanager.{{ cert_domains_list | first }}']
     paths: ['/']
     tls:
-    - secretName: tls-credential
+    - secretName: {{secret_name}}
       hosts:
       - alertmanager.{{ cert_domains_list | first }}
 
@@ -33,7 +33,7 @@ grafana:
     hosts: ['grafana.{{ cert_domains_list | first }}']
     path: "/"
     tls:
-    - secretName: tls-credential
+    - secretName: {{secret_name}}
       hosts:
       - grafana.{{ cert_domains_list | first }}
 
@@ -45,7 +45,7 @@ prometheus:
     hosts: ['prometheus.{{ cert_domains_list | first }}']
     paths: ['/']
     tls:
-    - secretName: tls-credential
+    - secretName: {{secret_name}}
       hosts:
       - prometheus.{{ cert_domains_list | first }}
 

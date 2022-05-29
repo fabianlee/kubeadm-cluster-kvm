@@ -1,7 +1,10 @@
 
 storage_class: nfs-client
+secret_name: tls-credential
+
+cert_domains_list: "{{cert_domains_primary_ingress}}"
 
 # 'atroo' means apps will be found at /
 # 'atcontext' means apps will be found at /grafana, /alertmanager, /prometheus
-prometheus_ingress_at: atcontext
+prometheus_ingress_at: atroot
 
