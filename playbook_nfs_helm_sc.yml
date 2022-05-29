@@ -10,12 +10,6 @@
 - hosts: control_plane
   gather_facts: yes
   become: yes
-  roles:
-    - role: helm3
-
-- hosts: control_plane
-  gather_facts: yes
-  become: yes
   become_user: ubuntu
 
   tasks:

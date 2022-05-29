@@ -7,3 +7,4 @@
     - kubeadm-controlplane
     - tiny-tools-all-nodes
     - kubeadm-fetch-kubeconfig-local
+    - helm3
