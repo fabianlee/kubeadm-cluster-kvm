@@ -44,6 +44,8 @@
 # --listen-metrics-urls=http://127.0.0.1:2381,http://192.168.122.217:2381
 # 
 
+# also add more memory to etcd during kubeadm init because I/O is slow and more memory might help
+
 
 # creating your own metrics for prom
 # https://kruschecompany.com/kubernetes-prometheus-operator/
