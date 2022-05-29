@@ -3,8 +3,8 @@
 - hosts: control_plane
   gather_facts: yes
   become: yes
-#  roles:
-#    - role: helm3
+  roles:
+    - role: helm3
 
 - hosts: control_plane
   gather_facts: yes
@@ -12,44 +12,3 @@
   become_user: ubuntu
   roles:
     - kube-prometheus-stack
-
-#  tasks:
-#
-#    # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-#    # helm show values prometheus-community/kube-prometheus-stack | tee prom-stack.yaml
-#    #
-#    # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
-#    - name: Add kube-prometheus-stack helm repo
-#      kubernetes.core.helm_repository:
-#        name: prometheus-community
-#        repo_url: https://prometheus-community.github.io/helm-charts
-#
-#    # kubectl create ns prom
-#    #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
-#    #helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
-#    #kubectl --namespace prom get pods -l "release=prom-stack"
-#    #
-#    # helm install --namespace prom --name  -f custom-values.yaml stable/prometheus-operator
-#    #helm install nfs-subdir-external-provisioner \
-#    #nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-#    #--set nfs.server=<IP> \
-#    #--set nfs.path=/data/nfs1 \
-#    #--set storageClass.onDelete=true
-#    - name: Deploy nfs subdir provisioner
-#      kubernetes.core.helm:
-#        name: prom-stack
-#        chart_ref: prometheus-community/kube-prometheus-stack
-#        wait: false
-#        values: "{{ lookup('template', 'prom-stack.yaml') | from_yaml }}"
-#        #release_namespace: default
-#        #create_namespace: false
-
-    # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/k8s_info_module.html
-#    - name: validate storageclass
-#      kubernetes.core.k8s_info:
-#        api_version: storage.k8s.io/v1
-#        kind: StorageClass
-#      register: sc_list
-#    - debug: msg="{{sc_list}}"
-
-
