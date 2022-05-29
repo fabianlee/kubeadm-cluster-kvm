@@ -1,0 +1,23 @@
+---
+
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm show values prometheus-community/kube-prometheus-stack | tee prom-stack.yaml
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add kube-prometheus-stack helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+# kubectl create ns prom
+#helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
+#kubectl --namespace prom get pods -l "release=prom-stack"
+- name: Deploy kube-prometheus-stack
+  kubernetes.core.helm:
+    name: prom-stack
+    chart_ref: prometheus-community/kube-prometheus-stack
+    wait: false
+    values: "{{ lookup('template', role_path + '/templates/prom-stack.yaml') | from_yaml }}"
+    release_namespace: prom
+    create_namespace: true
+

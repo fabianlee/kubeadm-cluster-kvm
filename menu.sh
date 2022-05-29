@@ -31,6 +31,8 @@ menu_items=(
   ""
   "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
   "nfs-client,Install nfs external provisioner and storageclass"
+  ""
+  "prometheus,Deploy open-source kube-prometheus-stack"
 )
 
 function showMenu() {
@@ -277,6 +279,16 @@ while [ 1 == 1 ]; do
     nfs-client)
       set -x
       ansible-playbook playbook_nfs_helm_sc.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+
+    prometheus)
+      set -x
+      ansible-playbook playbook_prometheus_helm.yml
       retVal=$?
       set +x 
 
