@@ -30,7 +30,7 @@ menu_items=(
   "curl,Validate exposed hello service using curl to LB Ingress"
   ""
   "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
-  "nfs-client,Install nfs external provisioner and storageclass"
+  "nfs-sc,Install nfs dynamic provisioner and StorageClass"
   ""
   "mailhog,Deploy in-cluster SMTP server for mail alerts"
   "prometheus,Deploy open-source kube-prometheus-stack"
@@ -277,7 +277,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    nfs-client)
+    nfs-sc)
       set -x
       ansible-playbook playbook_nfs_helm_sc.yml
       retVal=$?
