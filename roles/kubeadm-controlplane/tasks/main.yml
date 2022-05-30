@@ -1,10 +1,17 @@
 ---
 
+- name: copy kubeadm config file
+  template:
+    src: kubeadm.init.yaml
+    dest: /root/.
+
 - name: initialize kubeadm cluster
   shell:
+    # have not been able to get config to work properly with all variables I want
+    #cmd: kubeadm init --config=/root/kubeadm.init.yaml >> cluster_initialized.txt 2>&1
     cmd: kubeadm init --pod-network-cidr={{pod_cidr}} --service-cidr={{service_cidr}} --apiserver-advertise-address={{master_ip}} >> cluster_initialized.txt 2>&1
   args:
-    chdir: $HOME
+    #chdir: $HOME
     creates: cluster_initialized.txt
 
 - name: create .kube directory

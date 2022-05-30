@@ -30,3 +30,4 @@
     - docker-containerd
     - kubelet-kubeadm-apt
     - k9s
+    - yq

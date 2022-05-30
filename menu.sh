@@ -200,7 +200,7 @@ while [ 1 == 1 ]; do
 
     kubeadm-prep)
       set -x
-      ansible-playbook playbook_kubeadm_dependencies.yml
+      ansible-playbook playbook_kubeadm_prep.yml
       retVal=$?
       set +x 
 

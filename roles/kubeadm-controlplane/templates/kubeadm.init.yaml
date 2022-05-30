@@ -1,0 +1,32 @@
+---
+# https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta2/#kubeadm-k8s-io-v1beta2-ClusterConfiguration
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+etcd:
+  local:
+    extraArgs:
+      listen-metrics-url: "http://192.168.122.217:2381"
+controllerManager: 
+  extraArgs:
+    bind-address: 0.0.0.0
+scheduler: 
+  extraArgs:
+    bind-address: 0.0.0.0
+networking:
+  podSubnet: {{pod_cidr}}
+  serviceSubnet: {{service_cidr}}
+---
+# https://pkg.go.dev/k8s.io/kube-proxy/config/v1alpha1?utm_source=godoc#KubeProxyConfiguration
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: KubeProxyConfiguration
+BindAddress: 0.0.0.0
+#kubeProxy: 
+#  extraArgs:
+#    bind-address: 0.0.0.0
+---
+# https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta2/#kubeadm-k8s-io-v1beta2-InitConfiguration
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: {{master_ip}}
+
