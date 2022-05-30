@@ -41,12 +41,22 @@
     release_namespace: prom
     create_namespace: true
 
-- name: change prometheus etcd service port to 2381 (from default 2379) so it can be pulled as metric
+- name: retrieve prometheus etcd http-metrics TCP port
   become_user: ubuntu
   command:
-    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"port":2381}]}}'''
+    cmd: kubectl get services -n kube-system prom-stack-kube-prometheus-kube-etcd -o=jsonpath="{.spec.ports[?(@.name=='http-metrics')].port}"
+  register: prom_etcd
+- set_fact:
+    prom_etcd_port_needs_change: "{{prom_etcd.stdout|int != 2381}}"
+- debug: msg="{{prom_etcd_port_needs_change}}"
+
+- name: change prometheus etcd service port to 2381 so it can be pulled as metric
+  become_user: ubuntu
+  command:
+    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381}]}}'''
   register: etcd_service_port
-- debug: msg="{{etcd_service_port.stdout_lines}}"
+  when: prom_etcd_port_needs_change
+- debug: msg="{{etcd_service_port.stdout_lines|default('')}}"
 
 # fixups:
 # to avoid KubeProxyDown because metrics binding is empty
