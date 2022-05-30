@@ -1,6 +1,25 @@
 # https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 ---
 
+- name: retrieve mailhog ClusterIP
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
+  register: mailhog_cluster_ip
+
+
+- name: retrieve mailhog SMTP port
+  become_user: ubuntu
+  command:
+    cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.ports[?(@.name=='tcp-smtp')].port}"
+  register: mailhog_smtp_port
+
+- set_fact:
+    smtp_host_port: "{{mailhog_cluster_ip.stdout}}:{{mailhog_smtp_port.stdout}}"
+- debug: msg="{{smtp_host_port}}"
+
+
+
 # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 # helm show values prometheus-community/kube-prometheus-stack | tee prom-stack.yaml
 # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
@@ -21,6 +40,13 @@
     values: "{{ lookup('template', role_path + '/templates/prom-sparse-' + prometheus_ingress_at + '.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
+
+- name: change monitoring etcd service port to 2381 (from default 2379) so it can be recognized
+  become_user: ubuntu
+  command:
+    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"port":2381}]}}'''
+  register: etcd_service_port
+- debug: msg="{{etcd_service_port.stdout_lines}}"
 
 # fixups:
 # to avoid KubeProxyDown because metrics binding is empty

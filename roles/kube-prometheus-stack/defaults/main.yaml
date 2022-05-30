@@ -7,6 +7,3 @@ cert_domains_list: "{{cert_domains_primary_ingress}}"
 # 'atroot' means apps will be found at /, using subdomain names
 # 'atcontext' means apps will be found at /grafana, /alertmanager, /prometheus
 prometheus_ingress_at: atroot
-
-smtp_host_port: 10.249.92.69:1025
-
