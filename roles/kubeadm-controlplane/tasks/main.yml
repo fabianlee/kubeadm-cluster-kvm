@@ -41,3 +41,40 @@
     cmd: kubectl apply -f kube-flannel.yml >> kube-flannel.log
   args:
     creates: kube-flannel.log
+
+# to avoid KubeProxyDown because metrics binding is empty
+# https://stackoverflow.com/questions/70491211/prometheus-alert-rule-for-absent-discovered-target
+- name: put metricsBindAddress into kube-proxy configmap
+  become_user: ubuntu
+  shell:
+    cmd: 'kubectl get configmap/kube-proxy -n kube-system -o json | sed ''s#metricsBindAddress\: \\"\\"#metricsBindAddress\: 0.0.0.0:10249#'' | kubectl replace -f -'
+  register: kubeproxy_cm_update
+- debug: msg="{{kubeproxy_cm_update.stdout_lines}}"
+
+# KubeControllerManagerDown
+# https://github.com/prometheus-operator/kube-prometheus/issues/718
+# https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/kube-prometheus-on-kubeadm.md
+# https://prometheus-operator.dev/docs/kube-prometheus-on-kubeadm/
+- name: replace 'bind-address' for kube-controller-manager so metrics can be read from prometheus
+  replace:
+    path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+    regexp:  '--bind-address=127.0.0.1'
+    replace: '--bind-address=0.0.0.0'
+
+- name: replace 'bind-address' for kube-scheduler so metrics can be read from prometheus
+  replace:
+    path: /etc/kubernetes/manifests/kube-scheduler.yaml
+    regexp:  '--bind-address=127.0.0.1'
+    replace: '--bind-address=0.0.0.0'
+
+
+# https://groups.google.com/g/prometheus-users/c/_aI-HySJ-xM
+
+- name: append 'listen-metrics-url' for etcd so metrics can be read from prometheus
+  replace:
+    path: /etc/kubernetes/manifests/etcd.yaml
+    regexp:  '--listen-metrics-urls=http://127.0.0.1:2381$'
+    replace: '--listen-metrics-urls=http://127.0.0.1:2381,http://{{master_ip}}:2381'
+
+# this part has to go into prometheus role because it does not exist before prom is installed
+# etcdInsufficientMembers and TargetDown on job=kube-etcd resolved by modifying -n kube-system service/prom-stack-kube-prometheus-kube-etcd; modified spec.ports[@name=http-metrics].port=2381 .targetPort=2381
