@@ -3,10 +3,27 @@
 - name: increase cpu resources for etc
   replace:
     path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'cpu: 100m'
+    regexp:  'cpu: 100m' # 100m
     replace: 'cpu: 2000m'
+  register: cpu_modification
+- debug: msg="{{cpu_modification}}"
 - name: increase mem resources for etc
   replace:
     path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'memory: 100Mi'
+    regexp:  'memory: 100Mi' #100Mi
     replace: 'memory: 2000Mi'
+  register: memory_modification
+- debug: msg="{{memory_modification}}"
+
+# wait for filesystem etcd config changes to be picked up
+- pause:
+    minutes: 2
+  when: cpu_modification.changed or memory_modification.changed
+
+- name: wait for kubectl to be ready
+  become_user: ubuntu
+  shell: "kubectl wait pods -l component=etcd -n kube-system --for=condition=Ready --timeout=10s"
+  retries: 20
+  delay: 30
+  register: kubectl_etcd_ready
+  until: kubectl_etcd_ready.rc==0
