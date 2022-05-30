@@ -42,6 +42,16 @@
   args:
     creates: kube-flannel.log
 
+- name: is metricsBindAddress set to 0.0.0.0
+  become_user: ubuntu
+  shell:
+    cmd: 'kubectl get configmap/kube-proxy -n kube-system -o json | grep ''metricsBindAddress\: 0.0.0.0:1024'' | wc -l'
+  register: kubeproxy_metricsbind
+- set_fact:
+    kubeproxy_has_metricsbind: "{{ kubeproxy_metricsbind.stdout|int == 1 }}"
+- debug: msg="{{kubeproxy_has_metricsbind}}"
+  
+
 # to avoid KubeProxyDown because metrics binding is empty
 # https://stackoverflow.com/questions/70491211/prometheus-alert-rule-for-absent-discovered-target
 - name: put metricsBindAddress into kube-proxy configmap
@@ -49,7 +59,16 @@
   shell:
     cmd: 'kubectl get configmap/kube-proxy -n kube-system -o json | sed ''s#metricsBindAddress\: \\"\\"#metricsBindAddress\: 0.0.0.0:10249#'' | kubectl replace -f -'
   register: kubeproxy_cm_update
-- debug: msg="{{kubeproxy_cm_update.stdout_lines}}"
+  when: not kubeproxy_has_metricsbind
+- debug:
+    msg: "{{kubeproxy_cm_update.stdout_lines}}"
+  when: kubeproxy_cm_update.changed
+
+- name: rolling restart of kube-proxy daemonset to take changes
+  become_user: ubuntu
+  shell:
+    cmd: kubectl -n kube-system rollout restart daemonset/kube-proxy
+  when: kubeproxy_cm_update.changed
 
 # KubeControllerManagerDown
 # https://github.com/prometheus-operator/kube-prometheus/issues/718
@@ -78,16 +97,3 @@
 
 # this part has to go into prometheus role because it does not exist before prom is installed
 # etcdInsufficientMembers and TargetDown on job=kube-etcd resolved by modifying -n kube-system service/prom-stack-kube-prometheus-kube-etcd; modified spec.ports[@name=http-metrics].port=2381 .targetPort=2381
-
-
-
-- name: increase cpu resources for etc
-  replace:
-    path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'cpu: 100m'
-    replace: 'cpu: 2000m'
-- name: increase mem resources for etc
-  replace:
-    path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'memory: 100Mi'
-    replace: 'memory: 2000Mi'

@@ -8,3 +8,12 @@
     - tiny-tools-all-nodes
     - kubeadm-fetch-kubeconfig-local
     - helm3
+
+  # we put this task at the end because it forces a restart of etcd, which means kubectl is unavailable for X minutes
+  # TODO add a task that waits for kubectl or netcat on port 6443 to be reachable
+  tasks:
+    - name: etcd Daemonset reload
+      include_role:
+        name: kubeadm-controlplane
+        tasks_from: etcd-ds-restart.yml
+

@@ -41,7 +41,7 @@
     release_namespace: prom
     create_namespace: true
 
-- name: change monitoring etcd service port to 2381 (from default 2379) so it can be recognized
+- name: change prometheus etcd service port to 2381 (from default 2379) so it can be pulled as metric
   become_user: ubuntu
   command:
     cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"port":2381}]}}'''
