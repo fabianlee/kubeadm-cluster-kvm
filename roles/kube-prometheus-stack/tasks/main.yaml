@@ -6,8 +6,6 @@
   command:
     cmd: kubectl get services -n email mailhog -o=jsonpath="{.spec.clusterIP}"
   register: mailhog_cluster_ip
-
-
 - name: retrieve mailhog SMTP port
   become_user: ubuntu
   command:
