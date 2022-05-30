@@ -78,3 +78,16 @@
 
 # this part has to go into prometheus role because it does not exist before prom is installed
 # etcdInsufficientMembers and TargetDown on job=kube-etcd resolved by modifying -n kube-system service/prom-stack-kube-prometheus-kube-etcd; modified spec.ports[@name=http-metrics].port=2381 .targetPort=2381
+
+
+
+- name: increase cpu resources for etc
+  replace:
+    path: /etc/kubernetes/manifests/etcd.yaml
+    regexp:  'cpu: 100m'
+    replace: 'cpu: 2000m'
+- name: increase mem resources for etc
+  replace:
+    path: /etc/kubernetes/manifests/etcd.yaml
+    regexp:  'memory: 100Mi'
+    replace: 'memory: 2000Mi'
