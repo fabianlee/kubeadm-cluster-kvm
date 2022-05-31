@@ -5,7 +5,6 @@ alertmanager:
     annotations:
       kubernetes.io/ingress.class: nginx
 {% if prometheus_ingress_at == "subdomain" %}
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts: ['alertmanager.{{ cert_domains_list | first }}']
     paths: ['/']
     tls:
@@ -124,10 +123,11 @@ prometheus:
   prometheusSpec:
 {% if prometheus_ingress_at == "subdomain" %}
     externalUrl: "https://prometheus.{{ cert_domains_list | first }}/"
+    routePrefix: /
 {% elif prometheus_ingress_at == "context" %}
     externalUrl: "https://{{ cert_domains_list | first }}/prometheus"
+    routePrefix: /prometheus/
 {% endif %}
-    routePrefix: /prometheus
     storageSpec:
       volumeClaimTemplate:
         spec:
