@@ -26,6 +26,13 @@
     name: prometheus-community
     repo_url: https://prometheus-community.github.io/helm-charts
 
+- name: status of kube-prometheus-stack
+  kubernetes.core.helm_info:
+    name: prom-stack
+    release_namespace: prom
+  register: helm_info
+- debug: msg="{{helm_info.status.status}}"
+
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
 #helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
@@ -38,6 +45,7 @@
     values: "{{ lookup('template', role_path + '/templates/prom-sparse.yaml') | from_yaml }}"
     release_namespace: prom
     create_namespace: true
+    force: true # without this, subsequent 'helm upgrade' runs will fail because the service port patch done below is not recognized correctly
 
 - name: retrieve prometheus etcd http-metrics TCP port
   become_user: ubuntu
