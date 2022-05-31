@@ -4,6 +4,6 @@ secret_name: tls-credential
 
 cert_domains_list: "{{cert_domains_primary_ingress}}"
 
-# 'atroot' means apps will be found at /, using subdomain names
-# 'atcontext' means apps will be found at /grafana, /alertmanager, /prometheus
-prometheus_ingress_at: atroot
+# 'subdomain' means apps will be found at their own subdomain (e.g. alertmanager.kubeadm.local, prometheus.kubeadm.local)
+# 'context' means apps will be found at kubeadm.local but at their web context page (e.g. /grafana, /alertmanager, /prometheus)
+prometheus_ingress_at: subdomain
