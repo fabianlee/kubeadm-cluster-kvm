@@ -51,7 +51,7 @@
 - name: change prometheus etcd service port to 2381 so it can be pulled as metric
   become_user: ubuntu
   command:
-    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381}]}}'''
+    cmd: 'kubectl patch services -n kube-system prom-stack-kube-prometheus-kube-etcd --type=merge -p ''{"spec": {"ports": [{"name":"http-metrics","protocol":"TCP","port":2381,"targetPort":2381}]}}'''
   register: etcd_service_port
   when: prom_etcd_port_needs_change
 - debug: msg="{{etcd_service_port.stdout_lines|default('')}}"

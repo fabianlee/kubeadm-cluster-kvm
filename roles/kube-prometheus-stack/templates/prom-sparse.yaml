@@ -113,7 +113,7 @@ prometheus:
       - prometheus.{{ cert_domains_list | first }}
 {% elif prometheus_ingress_at == "context" %}
     hosts: ['{{ cert_domains_list | first }}']
-    paths: ['/prometheus/'] # does not need regex capture like others
+    paths: ['/prometheus'] # does not need regex capture like others, leave off trailing forward slash
     tls:
     - secretName: {{secret_name}}
       hosts:
@@ -126,7 +126,12 @@ prometheus:
     routePrefix: /
 {% elif prometheus_ingress_at == "context" %}
     externalUrl: "https://{{ cert_domains_list | first }}/prometheus"
-    routePrefix: /prometheus/
+
+    # link from alertmanager to source does not work when using same domain
+    # this ia problem with the elm file
+    # https://github.com/prometheus/alertmanager/issues/1881
+    # https://github.com/prometheus/alertmanager/pull/2470/files
+    routePrefix: /prometheus
 {% endif %}
     storageSpec:
       volumeClaimTemplate:
