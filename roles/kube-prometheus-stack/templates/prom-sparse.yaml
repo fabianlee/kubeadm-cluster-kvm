@@ -1,3 +1,70 @@
+# full values: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+
+# basic auth for prom http://elatov.github.io/2020/02/nginx-ingress-with-alertmanager-and-prometheus/
+# https://github.com/helm/charts/issues/11471
+
+# k3s is a small binary that does not have these independent components
+# going to try enabling components at k3s level
+# https://github.com/k3s-io/k3s/issues/3619#issuecomment-878501106
+# https://github.com/ricsanfre/pi-cluster/issues/22
+# https://github.com/k3s-io/k3s/issues/3619
+# check with: curl localhost:10249/metrics | grep ^kubeproxy 
+# grep ^etcd
+
+
+{% if k8s_implementation == "kubeadm" %}
+
+kubeEtcd:
+  enabled: false
+  service:
+    enabled: true
+    port: 2381
+    targetPort: 2381
+
+{% elif k8s_implementation == "k3s" %}
+
+# k3s uses sqllite, so we cannot monitor this component
+defaultRules:
+  rules:
+    etcd: false
+
+kubeEtcd:
+  enabled: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-controller-manager' -n kube-system
+kubeControllerManager:
+  enabled: true
+  endpoints: ['{{master_ip_internal}}']
+  service:
+    enabled: true
+    port: 10252
+    targetPort: 10252
+  serviceMonitor:
+    enabled: true
+    https: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-scheduler' -n kube-system
+kubeScheduler:
+  enabled: true
+  endpoints: ['{{master_ip_internal}}']
+  service:
+    enabled: true
+    port: 10251
+    targetPort: 10251
+  serviceMonitor:
+    enabled: true
+    https: false
+
+# matched to service port 'prom-stack-kube-prometheus-kube-proxy' -n kube-system
+kubeProxy:
+  enabled: true
+  endpoints: ['{{master_ip_internal}}']
+  service:
+    enabled: true
+    port: 10249
+    targetPort: 10249
+
+{% endif %}
 
 alertmanager:
   ingress:
@@ -41,7 +108,7 @@ alertmanager:
     global:
       resolve_timeout: 5m
       # global smtp settings
-      smtp_from: amgr@kubeadm
+      smtp_from: amgr@{{k8s_implementation}}
       smtp_smarthost: {{smtp_host_port}}
       smtp_require_tls: false
 
@@ -61,7 +128,7 @@ alertmanager:
     # https://prometheus.io/docs/alerting/latest/configuration/#email_config
     - name: email_platform
       email_configs:
-      - to: platform@kubeadm
+      - to: platform@{k8s_implementation}}
         send_resolved: true
         headers:
           # used jinja string to avoid needing to escape curly brackets (which should not be ansible evaluated)

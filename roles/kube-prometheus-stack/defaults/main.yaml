@@ -7,3 +7,6 @@ cert_domains_list: "{{cert_domains_primary_ingress}}"
 # 'subdomain' means apps will be found at their own subdomain (e.g. alertmanager.kubeadm.local, prometheus.kubeadm.local)
 # 'context' means apps will be found at kubeadm.local but at their web context page (e.g. /grafana, /alertmanager, /prometheus)
 prometheus_ingress_at: subdomain
+
+# kubernetes implementation type
+k8s_implementation: kubeadm
