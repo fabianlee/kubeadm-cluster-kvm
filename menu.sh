@@ -33,7 +33,7 @@ menu_items=(
   "nfs-sc,Install nfs dynamic provisioner and StorageClass"
   ""
   "mailhog,Deploy in-cluster SMTP server for mail alerts"
-  "prometheus,Deploy open-source kube-prometheus-stack"
+  "prometheus,Deploy community kube-prometheus-stack with helm"
 )
 
 function showMenu() {

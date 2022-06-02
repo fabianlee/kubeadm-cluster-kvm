@@ -31,7 +31,10 @@
     name: prom-stack
     release_namespace: prom
   register: helm_info
-- debug: msg="{{helm_info.status.status}}"
+- debug:
+    msg: "{{ helm_info.status.status }}"
+  # need conditional or fallback because uninstalled helm chart does not have nested variable
+  when: helm_info.status is defined
 
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
