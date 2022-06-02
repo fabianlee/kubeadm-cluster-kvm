@@ -15,7 +15,7 @@
 {% if k8s_implementation == "kubeadm" %}
 
 kubeEtcd:
-  enabled: false
+  enabled: true
   service:
     enabled: true
     port: 2381

@@ -25,7 +25,7 @@ cert_CA: myCA.local
 cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local','mailhog.kubedm.local']
 
 # prometheus monitoring put at subdomain by default ('context' is other choice)
-prometheus_ingress_at: context
+prometheus_ingress_at: subdomain
 
 # cluster nodes must see each other
 kvm_default_network: 192.168.122
