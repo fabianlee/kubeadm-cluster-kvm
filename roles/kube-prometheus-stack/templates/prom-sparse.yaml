@@ -1,17 +1,5 @@
 # full values: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
 
-# basic auth for prom http://elatov.github.io/2020/02/nginx-ingress-with-alertmanager-and-prometheus/
-# https://github.com/helm/charts/issues/11471
-
-# k3s is a small binary that does not have these independent components
-# going to try enabling components at k3s level
-# https://github.com/k3s-io/k3s/issues/3619#issuecomment-878501106
-# https://github.com/ricsanfre/pi-cluster/issues/22
-# https://github.com/k3s-io/k3s/issues/3619
-# check with: curl localhost:10249/metrics | grep ^kubeproxy 
-# grep ^etcd
-
-
 {% if k8s_implementation == "kubeadm" %}
 
 kubeEtcd:
@@ -195,7 +183,7 @@ prometheus:
     externalUrl: "https://{{ cert_domains_list | first }}/prometheus"
 
     # link from alertmanager to source does not work when using same domain
-    # this ia problem with the elm file
+    # this is problem with the elm file
     # https://github.com/prometheus/alertmanager/issues/1881
     # https://github.com/prometheus/alertmanager/pull/2470/files
     routePrefix: /prometheus
