@@ -20,7 +20,10 @@
     smtp_host_port: "{{mailhog_cluster_ip.stdout}}:{{mailhog_smtp_port.stdout}}"
 - debug: msg="{{smtp_host_port}}"
 
-
+- template:
+    src: prom-sparse.yaml
+    dest: /tmp/prom-sparse.yaml
+    mode: 0666
 
 # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 # helm show values prometheus-community/kube-prometheus-stack | tee prom-stack.yaml
