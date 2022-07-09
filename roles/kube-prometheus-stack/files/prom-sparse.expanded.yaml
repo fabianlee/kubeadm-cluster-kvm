@@ -1,12 +1,18 @@
 # full values: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
 
+
+# Problem with etcd GRPC rule is described here: https://github.com/rancher/rancher/issues/29939
+# need to account for more than just grpc_code!=OK
+defaultRules:
+  disabled:
+    etcdHighNumberOfFailedGRPCRequests: true
+
 kubeEtcd:
   enabled: true
   service:
     enabled: true
     port: 2381
     targetPort: 2381
-
 
 alertmanager:
   ingress:

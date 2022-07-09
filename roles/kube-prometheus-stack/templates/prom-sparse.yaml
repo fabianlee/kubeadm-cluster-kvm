@@ -2,6 +2,12 @@
 
 {% if k8s_implementation == "kubeadm" %}
 
+# Problem with etcd GRPC rule is described here: https://github.com/rancher/rancher/issues/29939
+# need to account for more than just grpc_code!=OK, needs to be: grpc_code=~"Unknown|FailedPrecondition|ResourceExhausted|Internal|Unavailable|DataLoss|DeadlineExceeded"
+defaultRules:
+  disabled:
+    etcdHighNumberOfFailedGRPCRequests: true
+
 kubeEtcd:
   enabled: true
   service:
