@@ -65,7 +65,8 @@ data "template_file" "network_config" {
 
   template = file("${path.module}/network_config_${var.ip_type}.cfg")
   vars = {
-    domain = var.dns_domain
+    # using domain would add it to DNS search suffix, we do not want that
+    domain = "" #var.dns_domain
     prefixIP = var.prefixIP
     octetIP = each.value.octetIP
   }
