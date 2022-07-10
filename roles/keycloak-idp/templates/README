@@ -1,0 +1,301 @@
+$ curl -k -s https://simpleoidc.kubeadm.local/.well-known/openid-configuration | jq
+{
+  "authorization_endpoint": "https://simpleoidc.kubeadm.local/auth",
+  "claims_parameter_supported": true,
+  "claims_supported": [
+    "auth_time",
+    "email",
+    "email_verified",
+    "groups",
+    "iss",
+    "locale",
+    "name",
+    "nickname",
+    "picture",
+    "sub",
+    "zoneinfo"
+  ],
+  "grant_types_supported": [
+    "implicit",
+    "authorization_code",
+    "refresh_token",
+    "client_credentials"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512"
+  ],
+  "issuer": "http://simple-oidc-provider",
+  "jwks_uri": "https://simpleoidc.kubeadm.local/certs",
+  "registration_endpoint": "https://simpleoidc.kubeadm.local/reg",
+  "request_object_signing_alg_values_supported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "request_parameter_supported": true,
+  "request_uri_parameter_supported": true,
+  "require_request_uri_registration": true,
+  "response_modes_supported": [
+    "form_post",
+    "fragment",
+    "query"
+  ],
+  "response_types_supported": [
+    "code id_token token",
+    "code id_token",
+    "code token",
+    "code",
+    "id_token token",
+    "id_token",
+    "none"
+  ],
+  "scopes_supported": [
+    "openid",
+    "offline_access",
+    "email",
+    "profile"
+  ],
+  "subject_types_supported": [
+    "public"
+  ],
+  "token_endpoint": "https://simpleoidc.kubeadm.local/token",
+  "token_endpoint_auth_methods_supported": [
+    "none",
+    "client_secret_basic",
+    "client_secret_jwt",
+    "client_secret_post",
+    "private_key_jwt"
+  ],
+  "token_endpoint_auth_signing_alg_values_supported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "userinfo_endpoint": "https://simpleoidc.kubeadm.local/me",
+  "userinfo_signing_alg_values_supported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512"
+  ],
+  "code_challenge_methods_supported": [
+    "plain",
+    "S256"
+  ],
+  "introspection_endpoint": "https://simpleoidc.kubeadm.local/token/introspection",
+  "introspection_endpoint_auth_methods_supported": [
+    "none",
+    "client_secret_basic",
+    "client_secret_jwt",
+    "client_secret_post",
+    "private_key_jwt"
+  ],
+  "introspection_endpoint_auth_signing_alg_values_supported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "revocation_endpoint": "https://simpleoidc.kubeadm.local/token/revocation",
+  "revocation_endpoint_auth_methods_supported": [
+    "none",
+    "client_secret_basic",
+    "client_secret_jwt",
+    "client_secret_post",
+    "private_key_jwt"
+  ],
+  "revocation_endpoint_auth_signing_alg_values_supported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "id_token_encryption_alg_values_supported": [
+    "RSA-OAEP",
+    "RSA-OAEP-256",
+    "RSA1_5",
+    "ECDH-ES",
+    "ECDH-ES+A128KW",
+    "ECDH-ES+A192KW",
+    "ECDH-ES+A256KW",
+    "A128KW",
+    "A192KW",
+    "A256KW",
+    "PBES2-HS256+A128KW",
+    "PBES2-HS384+A192KW",
+    "PBES2-HS512+A256KW"
+  ],
+  "id_token_encryption_enc_values_supported": [
+    "A128CBC-HS256",
+    "A128GCM",
+    "A192CBC-HS384",
+    "A192GCM",
+    "A256CBC-HS512",
+    "A256GCM"
+  ],
+  "userinfo_encryption_alg_values_supported": [
+    "RSA-OAEP",
+    "RSA-OAEP-256",
+    "RSA1_5",
+    "ECDH-ES",
+    "ECDH-ES+A128KW",
+    "ECDH-ES+A192KW",
+    "ECDH-ES+A256KW",
+    "A128KW",
+    "A192KW",
+    "A256KW",
+    "PBES2-HS256+A128KW",
+    "PBES2-HS384+A192KW",
+    "PBES2-HS512+A256KW"
+  ],
+  "userinfo_encryption_enc_values_supported": [
+    "A128CBC-HS256",
+    "A128GCM",
+    "A192CBC-HS384",
+    "A192GCM",
+    "A256CBC-HS512",
+    "A256GCM"
+  ],
+  "request_object_encryption_alg_values_supported": [
+    "A128KW",
+    "A192KW",
+    "A256KW",
+    "PBES2-HS256+A128KW",
+    "PBES2-HS384+A192KW",
+    "PBES2-HS512+A256KW",
+    "RSA-OAEP",
+    "RSA-OAEP-256",
+    "RSA1_5"
+  ],
+  "request_object_encryption_enc_values_supported": [
+    "A128CBC-HS256",
+    "A128GCM",
+    "A192CBC-HS384",
+    "A192GCM",
+    "A256CBC-HS512",
+    "A256GCM"
+  ],
+  "check_session_iframe": "https://simpleoidc.kubeadm.local/session/check",
+  "end_session_endpoint": "https://simpleoidc.kubeadm.local/session/end",
+  "claim_types_supported": [
+    "normal"
+  ]
+}
+
+
+# shows login page
+# can use harley@qlik.example/Pasword1!
+# if successful, sends to URL in env var 'REDIRECTS'
+$ curl -k -s https://simpleoidc.kubeadm.local/auth?client_id=foo&response_type=code&scope=openid
+
+# this is now accepted with redirect_uri
+$ curl -k -s https://simpleoidc.kubeadm.local/auth?client_id=foo&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fprometheus.kubeadm.local
+
+https://simpleoidc.kubeadm.local/auth?client_id=foo&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fsimpleoidc.kubeadm.local%2Fme
+
+# show endpoints
+$ curl -k -s https://simpleoidc.kubeadm.local/.well-known/openid-configuration | jq | grep endpoint
+  "authorization_endpoint": "https://simpleoidc.kubeadm.local/auth",
+  "registration_endpoint": "https://simpleoidc.kubeadm.local/reg",
+  "token_endpoint": "https://simpleoidc.kubeadm.local/token",
+  "token_endpoint_auth_methods_supported": [
+  "token_endpoint_auth_signing_alg_values_supported": [
+  "userinfo_endpoint": "https://simpleoidc.kubeadm.local/me",
+  "introspection_endpoint": "https://simpleoidc.kubeadm.local/token/introspection",
+  "introspection_endpoint_auth_methods_supported": [
+  "introspection_endpoint_auth_signing_alg_values_supported": [
+  "revocation_endpoint": "https://simpleoidc.kubeadm.local/token/revocation",
+  "revocation_endpoint_auth_methods_supported": [
+  "revocation_endpoint_auth_signing_alg_values_supported": [
+  "end_session_endpoint": "https://simpleoidc.kubeadm.local/session/end",
+
+
+
+# unprotected endpoint
+https://kubeadm.local/myhello/
+
+
+
+https://www.keycloak.org/getting-started/getting-started-kube
+kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml
+kubectl apply -f keycloak-subdomain-ingress.yaml
+
+follow these instructions: https://www.keycloak.org/getting-started/getting-started-kube
+browser to
+https://keycloak.kubeadm.local/admin/master/console/ (admin/admin)
+
+BE SURE! to check 'email verified' to ON, otherwise you get this error in oauth2 proxy deployment
+oauth-proxy-86945cc8c8-lx6s4:[2022/07/10 12:54:41] [oauthproxy.go:768] Error redeeming code during OAuth2 callback:  │
+│ email in id_token (first.last@kubeadm.local) isn't verified
+https://github.com/oauth2-proxy/oauth2-proxy/issues/1124
+
+to login as myuser
+https://keycloak.kubeadm.local/realms/myrealm/account/#/
+
+http://www.mastertheboss.com/keycloak/keycloak-oauth2-example-with-rest-application/
+shows how to invoke
+/opt/keycloak/bin/kcadm.sh to create realm and users
+also shows how to use curl for token and add attributes
+
+# auth-url can be internal to cluster
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/auth-signin: https://oauthproxy.kubeadm.local/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url: http://oauth-proxy.default.svc.cluster.local:4180/oauth2/auth
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  name: golang-hello-world-web-service
+

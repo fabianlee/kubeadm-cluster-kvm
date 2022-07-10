@@ -1,0 +1,115 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4180
+      targetPort: 4180
+      protocol: TCP
+      name: web
+  selector:
+    app: oauth-proxy
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth-proxy
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: oauth-proxy
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.3.0
+        env:
+          # OIDC Config
+          - name: "OAUTH2_PROXY_PROVIDER"
+            value: "keycloak-oidc"
+          - name: "OAUTH2_REDIRECT_URL"
+            value: "https://keycloak.kubeadm.local/oauth2/callback"
+          # must be reachable internal to cluster and external for browser
+          - name: "OAUTH2_PROXY_OIDC_ISSUER_URL"
+            # pod starts up correctly because internally reachable, but fails in browser
+            #value: http://10.249.20.82:8080/realms/myrealm
+            # pod starts up correctly because internally reachable, but fails in browser
+            #value: "http://keycloak:8080/realms/myrealm"
+
+            # correct value
+            value: "https://keycloak.kubeadm.local/realms/myrealm"
+          - name: "OAUTH2_PROXY_CLIENT_ID"
+            value: "myclient"
+          - name: "OAUTH2_PROXY_CLIENT_SECRET"
+            value: "UW68opEx4YCPCSBl8VfNyd0iqvL3xaqw"
+          - name: "OAUTH2_SCOPE"
+            value: "openid profile"
+          #  value: "openid profile email"
+
+          
+          # Cookie Config
+          # python -c 'import os,base64; print(base64.b64encode(os.urandom(16)).decode("ascii"))'
+          - name: "OAUTH2_PROXY_COOKIE_SECRET"
+            value: "1234567890abcdef" # needs to be 16,24,or 32 bytes
+          - name: "OAUTH2_PROXY_COOKIE_DOMAINS"
+            value: ".kubeadm.local"
+
+          # Proxy config
+          - name: "OAUTH2_PROXY_SSL_UPSTREAM_INSECURE_SKIP_VERIFY"
+            value: "true"
+          - name: "OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY"
+            value: "true"
+          - name: "OAUTH2_PROXY_EMAIL_DOMAINS"
+            value: "*"
+          - name: "OAUTH2_PROXY_WHITELIST_DOMAINS"
+            value: ".kubeadm.local"
+          - name: "OAUTH2_PROXY_HTTP_ADDRESS"
+            value: "0.0.0.0:4180"
+          - name: "OAUTH2_PROXY_SET_XAUTHREQUEST"
+            value: "true"
+          # TODO: is not exposing HEADERS to browser
+          #- name: "OAUTH2_PROXY_PASS_HOST_HEADER"
+          #  value: "true"
+          #- name: "OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER"
+          #  value: "true"
+          - name: "OAUTH2_PROXY_UPSTREAMS"
+            value: "file:///dev/null"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  rules:
+  - host: oauthproxy.kubeadm.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/oauth2"
+        backend:
+          service:
+            name: oauth-proxy
+            port:
+              number: 4180
+  tls:
+  - hosts:
+    - oauthproxy.kubeadm.local
+    secretName: tls-credential
