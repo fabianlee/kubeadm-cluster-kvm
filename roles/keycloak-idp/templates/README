@@ -299,3 +299,49 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   name: golang-hello-world-web-service
 
+
+
+$ curl -sk https://keycloak.kubeadm.local/realms/myrealm/.well-known/openid-configuration | jq | grep endpoint
+  "authorization_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/auth",
+  "token_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/token",
+  "introspection_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/token/introspect",
+  "userinfo_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/userinfo",
+  "end_session_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/logout",
+  "registration_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/clients-registrations/openid-connect",
+  "token_endpoint_auth_methods_supported": [
+  "token_endpoint_auth_signing_alg_values_supported": [
+  "introspection_endpoint_auth_methods_supported": [
+  "introspection_endpoint_auth_signing_alg_values_supported": [
+  "revocation_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/revoke",
+  "revocation_endpoint_auth_methods_supported": [
+  "revocation_endpoint_auth_signing_alg_values_supported": [
+  "device_authorization_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/auth/device",
+  "backchannel_authentication_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/ext/ciba/auth",
+  "pushed_authorization_request_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/ext/par/request",
+  "mtls_endpoint_aliases": {
+    "token_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/token",
+    "revocation_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/revoke",
+    "introspection_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/token/introspect",
+    "device_authorization_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/auth/device",
+    "registration_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/clients-registrations/openid-connect",
+    "userinfo_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/userinfo",
+    "pushed_authorization_request_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/ext/par/request",
+    "backchannel_authentication_endpoint": "https://keycloak.kubeadm.local/realms/myrealm/protocol/openid-connect/ext/ciba/auth"
+
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # TODO: not putting headers into response
+    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email,X-Forwarded-For
+
+    nginx.ingress.kubernetes.io/auth-signin: https://oauthproxy.kubeadm.local/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url-old: http://oauth-proxy.default.svc.cluster.local:4180/oauth2/auth
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  name: golang-hello-world-web-service
+  namespace: default
+
