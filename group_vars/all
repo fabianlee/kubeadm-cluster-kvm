@@ -20,6 +20,11 @@ master_ip: "{{ hostvars[groups['control_plane'][0]]['ansible_host'] | default(gr
 # last octet of IP address that MetalLB will allocate on bridged host network 
 metal_lb_octet: 145
 
+# by default, node DNS settings are used (including any search domains)
+# this can override the settings used by kubelet and therefore CoreDNS
+kubelet_use_custom_dns: true
+kubelet_dns: 192.168.122.1
+
 # for SAN certificate with custom CA
 cert_CA: myCA.local
 cert_domains_primary_ingress: ['kubeadm.local','kubeadm-alt.local','grafana.kubeadm.local','prometheus.kubeadm.local','alertmanager.kubeadm.local','mailhog.kubedm.local','oauthproxy.kubeadm.local','keycloak.kubeadm.local']

@@ -88,12 +88,42 @@
 
 
 # https://groups.google.com/g/prometheus-users/c/_aI-HySJ-xM
-
 - name: append 'listen-metrics-url' for etcd so metrics can be read from prometheus
   replace:
     path: /etc/kubernetes/manifests/etcd.yaml
     regexp:  '--listen-metrics-urls=http://127.0.0.1:2381$'
     replace: '--listen-metrics-urls=http://127.0.0.1:2381,http://{{master_ip}}:2381'
 
-# this part has to go into prometheus role because it does not exist before prom is installed
-# etcdInsufficientMembers and TargetDown on job=kube-etcd resolved by modifying -n kube-system service/prom-stack-kube-prometheus-kube-etcd; modified spec.ports[@name=http-metrics].port=2381 .targetPort=2381
+
+# provides CoreDNS an DNS lookup independent of node by providing alternate resolv.conf file
+- name: create custom resolv.conf for independent CoreDNS used by kubelet
+  copy:
+    dest: /etc/kubeadm-resolv.conf
+    owner: root
+    group: root
+    mode: 0660
+    content: |
+      nameserver: {{kubelet_dns}}
+  register: new_resolv_conf
+  when: kubelet_use_custom_dns and kubelet_dns is defined
+
+- name: update resolvConf in kubelet-config ConfigMap
+  become_user: ubuntu
+  shell:
+    cmd: 'kubectl get cm -n kube-system kubelet-config -o=json | jq ''del(.metadata.resourceVersion,.metadata.uid,.metadata.selfLink,.metadata.creationTimestamp,.metadata.annotations,.metadata.generation,.metadata.ownerReferences,.status)'' | sed -E ''s#resolvConf: [^\n ]*\\n#resolvConf: /etc/kubeadm-resolv.conf\\n#'' | kubectl replace -f -'
+  when: new_resolv_conf.changed
+
+- name: replace 'resolvConf' for kubelet independent DNS on filesystem
+  replace:
+    path: /var/lib/kubelet/config.yaml
+    regexp:  'resolvConf: .*'
+    replace: 'resolvConf: /etc/kubeadm-resolv.conf'
+  when: new_resolv_conf.changed
+
+- name: rolling restart of kube-proxy daemonset to take changes
+  become_user: ubuntu
+  shell:
+    cmd: kubectl -n kube-system rollout restart daemonset/kube-proxy
+  when: new_resolv_conf.changed
+
+

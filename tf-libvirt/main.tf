@@ -66,7 +66,7 @@ data "template_file" "network_config" {
   template = file("${path.module}/network_config_${var.ip_type}.cfg")
   vars = {
     # using domain would add it to DNS search suffix, we do not want that
-    domain = "" #var.dns_domain
+    domain = var.dns_domain # set to empty string to avoid DNS search domains in pod DNS requests
     prefixIP = var.prefixIP
     octetIP = each.value.octetIP
   }
