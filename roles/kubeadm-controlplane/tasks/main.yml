@@ -103,7 +103,7 @@
     group: root
     mode: 0660
     content: |
-      nameserver: {{kubelet_dns}}
+      nameserver {{kubelet_dns}}
   register: new_resolv_conf
   when: kubelet_use_custom_dns and kubelet_dns is defined
 
