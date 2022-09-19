@@ -4,6 +4,6 @@
   become: yes
   roles:
     # create certs
-    - { role: cert-with-ca, cert_overwrite: false }
+    - { role: cert-with-ca, cert_overwrite: true }
     # load into cluster
-    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default'], tls_secret_overwrite: false }
+    - { role: apply-k8s-tls-secrets, secret_namespace_list: [ 'default'], tls_secret_overwrite: true }

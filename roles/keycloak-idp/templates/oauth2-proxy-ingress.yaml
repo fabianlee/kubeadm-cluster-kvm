@@ -6,21 +6,21 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
   labels:
-    app: oauth-proxy
-  name: oauth-proxy
+    app: oauth2-proxy
+  name: oauth2-proxy
 spec:
   rules:
-  - host: oauthproxy.kubeadm.local
+  - host: oauth2proxy.kubeadm.local
     http:
       paths:
       - pathType: Prefix
-        path: "/oauth2"
+        path: "/" #"/oauth2/"
         backend:
           service:
-            name: oauth-proxy
+            name: oauth2-proxy
             port:
               number: 4180
   tls:
   - hosts:
-    - oauthproxy.kubeadm.local
-    secretName: tls-credential
+    - oauth2proxy.kubeadm.local
+    secretName: oauth2proxy-tls-secret
