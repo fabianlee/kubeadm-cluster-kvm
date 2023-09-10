@@ -1,0 +1,146 @@
+# https://github.com/kubernetes-sigs/prometheus-adapter
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md
+---
+
+- set_fact:
+    master_ip_internal: "{{ansible_ens3.ipv4.address}}"
+- debug: msg="{{master_ip_internal}}"
+
+- set_fact:
+    service_ns: prom
+    service_name: prom-stack-kube-prometheus-prometheus
+    deployment_name: adapter-release-prometheus-adapter
+
+- name: get port for service {{service_name}}
+  command:
+    cmd: kubectl get service {{service_name}} -n {{service_ns}} -o=jsonpath='{.spec.ports[?(@.name=="http-web")].port}'
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: service_port_cmd
+- debug: var=service_port_cmd.stdout
+- set_fact:
+    service_port: "{{service_port_cmd.stdout}}"
+
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
+- name: Add prometheus-community helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: status of prometheus-adapter
+  kubernetes.core.helm_info:
+    name: adapter-release
+    release_namespace: "{{service_ns}}"
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: helm_info
+- debug:
+    msg: "{{ helm_info.status.status }}"
+  # need conditional or fallback because uninstalled helm chart does not have nested variable
+  when: helm_info.status is defined
+
+- name: create {{service_ns}} ns
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{kubeconfig}}"
+    name: "{{service_ns}}"
+    kind: Namespace
+
+# helm chart values
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-adapter/values.yaml
+- template:
+    src: helm-values.yaml
+    dest: .
+    mode: 0666
+
+- name: Deploy kube-prometheus-stack with set-file params for templates
+  command:
+    #
+    # instead of setting each value, now going to use values file (which also includes complex custom rule)
+    #
+    cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}} --values=./helm-values.yaml
+    #cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --values=./helm-values.yaml
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: helm_cmd
+  when: true
+- debug:
+    msg: "{{ helm_cmd|default('') }}"
+
+
+
+
+#
+# enable custom metrics API
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/walkthrough.md
+#
+- template:
+    src: "{{ item }}"
+    dest: .
+    mode: 0666
+  loop:
+    - api-service.yaml
+
+- name: register API for custom metrics
+  kubernetes.core.k8s:
+    state: present
+    src: api-service.yaml
+    kubeconfig: "{{kubeconfig}}"
+
+
+- name: restart prometheus-adapter deployment to be ready before continuing
+  command:
+    cmd: kubectl rollout restart deployment -n {{service_ns}} {{deployment_name}}
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+
+- name: wait for prometheus-adapter deployment to be ready
+  command:
+    cmd: "kubectl rollout status deployment -n {{service_ns}} {{deployment_name}} --timeout=30s"
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  retries: 5
+  delay: 30
+  register: kubectl_dep_ready
+  until: kubectl_dep_ready.rc==0
+
+- name: make sure prometheus-adapter logs does not have error 'unable'
+  shell:
+    cmd: kubectl logs deployment/{{deployment_name}} -n {{service_ns}} | grep -v unable
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+
+- name: validate kubectl api on custom metrics
+  shell:
+    cmd: kubectl get --raw /apis/custom.metrics.k8s.io/v1beta2 | jq | grep total_
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: custom_api
+- debug: var=custom_api.stdout_lines
+
+
+#
+# Update HorizontalPodAutoscale to use custom prometheus-adapter metrics
+#
+- template:
+    src: "{{ item }}"
+    dest: .
+    mode: 0666
+  loop:
+    - golang-hello-world-web-hpa.yaml
+
+- name: deploy updated HorizontalPodAutoscaler for hello service based on prometheus-adapter metrics
+  shell:
+    cmd: kubectl apply -f golang-hello-world-web-hpa.yaml
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: k8s_apply
+- debug: var=k8s_apply.stdout_lines
+
+- name: show custom metrics available on golang-hello-world-web
+  shell:
+    cmd: kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta2/namespaces/default/pods/*/request_count_per_min?selector=app%3Dgolang-hello-world-web" | jq
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: custom_metrics
+- debug: var=custom_metrics.stdout_lines

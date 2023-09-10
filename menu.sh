@@ -34,6 +34,7 @@ menu_items=(
   ""
   "mailhog,Deploy in-cluster SMTP server for mail alerts"
   "prometheus,Deploy community kube-prometheus-stack with helm"
+  "promadapter,Deploy Prometheus adapter that provides custom metrics"
 )
 
 function showMenu() {
@@ -297,6 +298,14 @@ while [ 1 == 1 ]; do
     prometheus)
       set -x
       ansible-playbook playbook_prometheus_helm.yml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    promadapter)
+      set -x
+      ansible-playbook playbook_prometheus_adapter.yml
       retVal=$?
       set +x 
 

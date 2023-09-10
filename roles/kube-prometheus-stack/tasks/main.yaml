@@ -43,7 +43,6 @@
   # need conditional or fallback because uninstalled helm chart does not have nested variable
   when: helm_info.status is defined
 
-
 # kubectl create ns prom
 #helm install --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
 #helm upgrade --namespace prom -f prom-stack.yaml prom-stack prometheus-community/kube-prometheus-stack
@@ -57,5 +56,16 @@
     release_namespace: prom
     create_namespace: true
 
-# add more memory to etcd during kubeadm init because I/O is slow and more memory might help
 
+#
+# Have to apply this after Prometheus is installed, so ServiceMonitor CRD exists !
+#
+- template:
+    src: golang-hello-world-web-servicemonitor.yaml
+    dest: .
+    mode: 0666
+- name: apply ServiceMonitor to hello world service
+  kubernetes.core.k8s:
+    state: present
+    #kubeconfig: "{{KUBECONFIG}}"
+    src: golang-hello-world-web-servicemonitor.yaml
