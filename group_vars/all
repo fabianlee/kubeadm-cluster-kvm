@@ -5,7 +5,7 @@ ansible_user: ubuntu
 users: ['ubuntu'] # 'ubuntu' for kvm/libvirt
 
 # major.minor version for apt install of utilities
-kubeadm_version: 1.24
+kubeadm_version: "1.28" # needs to be string for comparisons later (not float)
 k8s_implementation: kubeadm
 # 1.23 can still work with dockershim, but 1.24 requires containerd
 use_containerd: true

@@ -11,19 +11,48 @@
     state: present
     update_cache: yes
 
-- name: add Kubernetes apt-key
-  apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    state: present
+- name: (DEPRECATED) kubernetes legacy package repositories
+  block:
+  
+    - name: add Kubernetes apt-key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+    
+    - name: add google repository
+      apt_repository:
+        repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+        filename: kubeadm
+        update_cache: yes
+        mode: 0644
+        #validate_certs: no
+  when: kubeadm_version <= '1.24'
 
-- name: add google repository
-  apt_repository:
-    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
-    state: present
-    filename: kubeadm
-    update_cache: yes
-    mode: 0644
-    #validate_certs: no
+- name: (NEWER) pkgs.k8s.io package repositories
+  block:
+
+    # save ASCII-armored gpg key locally
+    - name: get key for pkgs.k8s.io apt repo
+      shell:
+        cmd: curl -fsSL https://pkgs.k8s.io/core:/stable:/v{{ kubeadm_version }}/deb/Release.key -o /usr/share/keyrings/kubernetes-apt-keyring.asc
+
+    - name: chmod of keyring
+      command:
+        cmd: chmod 0644 /usr/share/keyrings/kubernetes-apt-keyring.asc
+    
+    # add custom apt repo with 'signed-by' referring to gpg key
+    - name: add pkgs.k8s.io apt repository
+      apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v{{ kubeadm_version }}/deb/ /
+        state: present
+        filename: kubernetes
+        update_cache: yes
+        mode: 0644
+        validate_certs: false
+
+  when: kubeadm_version > '1.24'
+
 
 - name: install kubeadm and kubelet packages
   package:
@@ -31,8 +60,11 @@
       - kubelet={{kubeadm_version}}*
       - kubeadm={{kubeadm_version}}*
       - kubectl={{kubeadm_version}}*
+      #- kubelet={{kubeadm_version}}*
+      #- kubeadm={{kubeadm_version}}*
+      #- kubectl={{kubeadm_version}}*
       # not required
-      #- kubernetes-cni={{kubeadm_version}}*
+      - kubernetes-cni
     state: present
     update_cache: yes
     allow_downgrades: yes

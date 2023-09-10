@@ -49,59 +49,104 @@
     state: present
     #update_cache: yes
 
-- name: is docker key already loaded into keyring
-  command: apt-key list --list-signatures
-  register: docker_signatures
-
-- name: get docker key, direct internet
-  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  args:
-    warn: no
-  when: not '8D81803C0EBFCD88' in docker_signatures.stdout
-
-- name: install fingerprint for docker
-  apt_key:
-    id: 08D81803C0EBFCD88
-    state: present
-
-- name: add docker apt repository to source list
-  apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_lsb.codename|lower}} stable"
-    state: present
-    filename: docker
-    update_cache: yes
-    mode: 0644
-
-- name: create Docker config directory
-  file:
-    path: /etc/docker
-    state: directory
-
-- name: changing Docker to systemd driver expected by kubeadm, instead of default cgroupfs driver
-  copy:
-    dest: "/etc/docker/daemon.json"
-    content: |
-        {
-        "exec-opts": ["native.cgroupdriver=systemd"],
-        "log-driver": "json-file",
-        "log-opts": {
-          "max-size": "10m"
-        },
-        "storage-driver": "overlay2"
-        }
-
-- name: install docker and containerd packages
-  package:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-    state: present
-    update_cache: yes
-  register: docker_installed
-
-- name: CONFIGURE CONTAINERD BLOCK
+- name: LEGACY DOCKER BLOCK
   block:
+
+    - name: is docker key already loaded into keyring
+      command: apt-key list --list-signatures
+      register: docker_signatures
+    
+    - name: get docker key, direct internet
+      shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      args:
+        warn: no
+      when: not '8D81803C0EBFCD88' in docker_signatures.stdout
+    
+    - name: install fingerprint for docker
+      apt_key:
+        id: 08D81803C0EBFCD88
+        state: present
+    
+    - name: add docker apt repository to source list
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_lsb.codename|lower}} stable"
+        state: present
+        filename: docker
+        update_cache: yes
+        mode: 0644
+    
+    - name: create Docker config directory
+      file:
+        path: /etc/docker
+        state: directory
+    
+    - name: changing Docker to systemd driver expected by kubeadm, instead of default cgroupfs driver
+      copy:
+        dest: "/etc/docker/daemon.json"
+        content: |
+            {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "10m"
+            },
+            "storage-driver": "overlay2"
+            }
+    
+    - name: install docker and containerd packages
+      package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+      register: docker_installed
+
+    - name: move docker cache directory to {{docker_cache_dir}} if still in default location
+      include_tasks: docker-cache-dir.yml
+    
+    - name: create systemd dir for docker config
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+    
+    - name: add insecure registry to docker
+      template:
+        src: docker.j2
+        dest: /etc/default/docker
+        
+    - name: get all members of custom group
+      command: members {{docker_member_group}}
+      register: docker_members
+      failed_when: not docker_members.rc in [0,1]
+    
+    - name: add list of users to docker group so that sudo is unecessary
+      user:
+        name: "{{item}}"
+        groups: docker
+        append: yes
+      with_items: "{{ docker_members.stdout.split() }}"
+    
+    - name: check cgroup driver, which should be systemd to match expectation of kubeadm
+      shell:
+        cmd: docker info | grep -i cgroup
+      register: docker_cgroup
+    - debug: msg="{{docker_cgroup.stdout_lines}}"
+
+  # block
+  when: not use_containerd
+
+- name: CONTAINERD BLOCK
+  block:
+
+    - name: install containerd packages
+      package:
+        name:
+          - containerd.io
+        state: present
+        update_cache: yes
+      register: containerd_installed
 
     - name: create config dir for containerd
       file:
@@ -141,37 +186,7 @@
       systemd:
         name: containerd
         state: restarted
-
+  # block
   when: use_containerd
 
 
-- name: move docker cache directory to {{docker_cache_dir}} if still in default location
-  include_tasks: docker-cache-dir.yml
-
-- name: create systemd dir for docker config
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
-
-- name: add insecure registry to docker
-  template:
-    src: docker.j2
-    dest: /etc/default/docker
-    
-- name: get all members of custom group
-  command: members {{docker_member_group}}
-  register: docker_members
-  failed_when: not docker_members.rc in [0,1]
-
-- name: add list of users to docker group so that sudo is unecessary
-  user:
-    name: "{{item}}"
-    groups: docker
-    append: yes
-  with_items: "{{ docker_members.stdout.split() }}"
-
-- name: check cgroup driver, which should be systemd to match expectation of kubeadm
-  shell:
-    cmd: docker info | grep -i cgroup
-  register: docker_cgroup
-- debug: msg="{{docker_cgroup.stdout_lines}}"

@@ -57,3 +57,25 @@ virsh-snapshot-delete:
 	virsh snapshot-delete control1-192.168.122.217 adv-test
 	virsh snapshot-delete worker1-192.168.122.218 adv-test
 	virsh snapshot-delete worker2-192.168.122.219 adv-test
+
+virsh-snapshot-revert:
+	echo "Stopping all VMs, reverting snapshot..."
+	virsh destroy control1-192.168.122.217 || true
+	virsh destroy worker1-192.168.122.218 || true
+	virsh destroy worker2-192.168.122.219 || true
+	sleep 5
+	virsh snapshot-revert control1-192.168.122.217 --snapshotname adv-test
+	virsh snapshot-revert worker1-192.168.122.218 --snapshotname adv-test
+	virsh snapshot-revert worker2-192.168.122.219 --snapshotname adv-test
+	virsh start control1-192.168.122.217 || true
+	virsh start worker1-192.168.122.218 || true
+	virsh start worker2-192.168.122.219 || true
+
+virsh-start-all:
+	virsh start control1-192.168.122.217 || true
+	virsh start worker1-192.168.122.218 || true
+	virsh start worker2-192.168.122.219 || true
+virsh-stop-all:
+	virsh destroy control1-192.168.122.217 || true
+	virsh destroy worker1-192.168.122.218 || true
+	virsh destroy worker2-192.168.122.219 || true
