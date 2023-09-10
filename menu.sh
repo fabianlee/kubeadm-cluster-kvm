@@ -24,7 +24,7 @@ menu_items=(
   ""
   "metallb,Configure MetalLB to provide IP addresses to LB"
   "certs,Generate and load TLS certificates into cluster"
-  "ingress,Deploy NGINX Ingress as load balancer"
+  "nginx,Deploy NGINX Ingress as load balancer"
   ""
   "hello,Deploy hello world service"
   "curl,Validate exposed hello service using curl to LB Ingress"
@@ -240,9 +240,9 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    ingress)
+    nginx)
       set -x
-      ansible-playbook playbook_nginx_ingress.yml
+      ansible-playbook playbook_nginx.yml
       retVal=$?
       set +x 
 
@@ -259,7 +259,7 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
     curl)
-      lb_ip=$(kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[].ip}")
+      lb_ip=$(KUBECONFIG=/tmp/kubeadm-kubeconfig kubectl get service -n ingress-nginx ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[].ip}")
       echo "load balancer IP: $lb_ip"
       set -x
       curl -k --resolve kubeadm.local:443:${lb_ip} https://kubeadm.local:443/myhello/

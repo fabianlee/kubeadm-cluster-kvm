@@ -1,0 +1,12 @@
+---
+
+- hosts: control_plane
+  gather_facts: yes
+  become: yes
+  roles:
+     # primary and secondary Daemonset nginx controllers
+    - role: add_primary_nginx_ingress
+
+    # Ingress objects
+    #- role: nginx_ingress
+

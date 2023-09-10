@@ -1,0 +1,28 @@
+---
+
+- name: copy older nginx ingress manifest template
+  template:
+    src: nginx-deploy-legacy.yaml
+    dest: .
+  when: kubeadm_version < '1.22'
+
+- name: copy nginx ingress v1.8.1 manifest template
+  template:
+    src: nginx-deploy-v1.8.1.yaml
+    dest: nginx-deploy.yaml
+  when: kubeadm_version >= '1.22'
+
+- name: apply nginx ingress manifest
+  k8s:
+    state: present
+    kubeconfig: "{{kubeconfig}}"
+    src: ./nginx-deploy.yaml
+
+- name: wait for nginx daemonset to be ready before continuing
+  shell: "kubectl rollout status daemonset -n ingress-nginx ingress-nginx-controller --timeout=45s"
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  retries: 10
+  delay: 30
+  register: kubectl_nginx_ready
+  until: kubectl_nginx_ready.rc==0
