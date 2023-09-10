@@ -9,11 +9,20 @@
     - kubeadm-fetch-kubeconfig-local
     - helm3
 
-  # we put this task at the end because it forces a restart of etcd, which means kubectl is unavailable for X minutes
-  # TODO add a task that waits for kubectl or netcat on port 6443 to be reachable
+# TODO add a task that waits for kubectl or netcat on port 6443 to be reachable
+- hosts: control_plane
+  gather_facts: yes
+  become: yes
   tasks:
+    - name: wait for kubectl on port 6443 to be ready
+      wait_for:
+        host: 0.0.0.0
+        port: 6443
+        delay: 10
+        timeout: 90
+
+      # we put this task at the end because it forces a restart of etcd, which means kubectl is unavailable for X minutes
     - name: etcd Daemonset reload
       include_role:
         name: kubeadm-controlplane
         tasks_from: etcd-ds-restart.yml
-
