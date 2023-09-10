@@ -153,6 +153,7 @@
       export VISUAL=vim
 
 # https://www.fosstechnix.com/how-to-install-kubernetes-cluster-on-ubuntu/
+# https://kubernetes.io/docs/reference/networking/ports-and-protocols/
 - name: open ufw port for kubeadm controlplane
   ufw: rule=allow port={{item}} proto=tcp
   loop:

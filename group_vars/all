@@ -18,7 +18,10 @@ service_cidr: 10.249.0.0/16
 master_ip: "{{ hostvars[groups['control_plane'][0]]['ansible_host'] | default(groups['control_plane'][0]) }}"
 
 # last octet of IP address that MetalLB will allocate on bridged host network 
+metal_lb_prefix: 192.168.2
 metal_lb_octet: 145
+metal_lb_primary: "{{metal_lb_prefix}}.{{metal_lb_octet}}"
+metal_lb_secondary: "{{metal_lb_prefix}}.{{metal_lb_octet+1}}"
 
 # by default, node DNS settings are used (including any search domains)
 # this can override the settings used by kubelet and therefore CoreDNS

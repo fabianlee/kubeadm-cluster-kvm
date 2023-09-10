@@ -1,0 +1,14 @@
+# older versions of MetalLB used ConfigMap to defined address pools
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - "{{metal_lb_primary}}-{{metal_lb_secondary}}"

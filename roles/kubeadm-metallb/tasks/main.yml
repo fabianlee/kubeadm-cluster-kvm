@@ -9,43 +9,82 @@
 
 - debug: msg="{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}"
 
-# https://github.com/metallb/metallb/issues/888
-# https://devopslearning.medium.com/metallb-load-balancer-for-bare-metal-kubernetes-43686aa0724f
-- name: create metallb memberlist secret that is missing from newer docs
-  shell:
-    cmd: 'kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"'
-  environment:
-    KUBECONFIG: "{{KUBECONFIG}}"
 
+- name: (LEGACY) metallb
+  block:
 
-# https://metallb.universe.tf/configuration/
-- name: create metallb configmap
-  kubernetes.core.k8s:
-    state: present
-    kubeconfig: "{{KUBECONFIG}}"
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        namespace: metallb-system
-        name: config
-      data:
-        config: |
-          address-pools:
-          - name: default
-            protocol: layer2
-            addresses:
-            - "{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}-{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}" # single IP would need CIDR block suffixed to be valid e.g. /24
+    # https://github.com/metallb/metallb/issues/888
+    # https://devopslearning.medium.com/metallb-load-balancer-for-bare-metal-kubernetes-43686aa0724f
+    - name: create metallb memberlist secret that is missing from newer docs
+      shell:
+        cmd: 'kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"'
+      environment:
+        KUBECONFIG: "{{KUBECONFIG}}"
+    
+    
+    # https://metallb.universe.tf/configuration/
+    - name: create metallb configmap
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: "{{KUBECONFIG}}"
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            namespace: metallb-system
+            name: config
+          data:
+            config: |
+              address-pools:
+              - name: default
+                protocol: layer2
+                addresses:
+                - "{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}-{{hostvars['localhost'].metal_lb_prefix}}.{{metal_lb_octet}}" # single IP would need CIDR block suffixed to be valid e.g. /24
+    
+    
+    - name: copy metallb yaml to remote host
+      copy:
+        src: metallb.yaml
+        dest: .
+    
+    - name: apply MetalLB main manifest
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: "{{KUBECONFIG}}"
+        src: metallb.yaml
+  # block
+  when: metallb_version < "v0.11"
 
+- name: BLOCK use newer CRD (not Configmap) for MetalLB v0.12 and later
+  block:
 
-- name: copy metallb yaml to remote host
-  copy:
-    src: metallb.yaml
-    dest: .
+    - name: copy static manifests to /tmp
+      copy:
+        src: "{{item}}"
+        dest: /tmp
+        mode: 0766
+      with_fileglob: "*.yaml"
+    
+    - name: create file out of every file in template directory
+      template:
+        src: "{{item}}"
+        dest: /tmp/.
+      with_fileglob: "{{role_path}}/templates/*"
 
-- name: apply MetalLB main manifest
-  kubernetes.core.k8s:
-    state: present
-    kubeconfig: "{{KUBECONFIG}}"
-    src: metallb.yaml
+    - name: (TODO required for k3s, but maybe not kubeadm) replace 'failurePolicy' on validatingwebhook, otherwise we get validating failures from kubeadm
+      command:
+        cmd: "sed -i 's/failurePolicy: Fail/failurePolicy: Ignore/' /tmp/metallb-native-{{metallb_version}}.yaml"
 
+    # https://metallb.universe.tf/installation/
+    - name: apply newer CRD style of metallb manifests
+      k8s:
+        state: present
+        kubeconfig: "{{KUBECONFIG}}"
+        src: "/tmp/{{item}}"
+      loop:
+        - metallb-native-{{metallb_version}}.yaml
+        - metallb-ipaddresspool.yml
+
+  # block
+  when: metallb_version >= "v0.12"
+    

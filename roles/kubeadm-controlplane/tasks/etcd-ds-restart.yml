@@ -15,9 +15,21 @@
   register: memory_modification
 - debug: msg="{{memory_modification}}"
 
-# wait for filesystem etcd config changes to be picked up
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/
+- name: wait for etcd ports to be ready
+  wait_for:
+    host: 0.0.0.0
+    port: 2379
+    delay: 10
+    timeout: 90
+  loop:
+    - 2379
+    - 2380
+  when: cpu_modification.changed or memory_modification.changed
+
+# additional wait for filesystem etcd config changes to be picked up
 - pause:
-    minutes: 2
+    seconds: 30
   when: cpu_modification.changed or memory_modification.changed
 
 - name: wait for kubectl to be ready
