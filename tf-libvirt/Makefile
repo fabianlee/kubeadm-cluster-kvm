@@ -44,9 +44,9 @@ validate-cloud-config:
 	cloud-init devel schema --config-file cloud_init.cfg
 
 virsh-create-snapshot:
-	virsh snapshot-create-as control1-192.168.122.217 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
-	virsh snapshot-create-as worker1-192.168.122.218 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
-	virsh snapshot-create-as worker2-192.168.122.219 --name adv-test --disk-only --diskspec vda,snapshot=internal --diskspec hdd,snapshot=no
+	virsh snapshot-create-as control1-192.168.122.217 --name adv-test
+	virsh snapshot-create-as worker1-192.168.122.218 --name adv-test
+	virsh snapshot-create-as worker2-192.168.122.219 --name adv-test
 
 ## reverting by doing internal snapshot deletion
 virsh-snapshot-delete:
