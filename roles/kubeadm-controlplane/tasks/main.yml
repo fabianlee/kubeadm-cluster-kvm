@@ -34,20 +34,22 @@
 
 # flanneld located at '/opt/cni/bin' for kubeadm (and not '/opt/bin')
 # do not need k8s-manifests/kube-flannel-rbac.yml in newer versions
-- command: kubectl get ns kube-flannel
-  failed_when: false
-  register: flannel_ns
 - name: get flannel manifest, use our own pod CIDR block instead of default which ends up in configmap kube-system/kube-flannel-cfg
+  become_user: ubuntu
   shell: 
     cmd: curl -fsSL https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed 's#10.244.0.0/16#{{pod_cidr}}#' > kube-flannel.yml
-  when: flannel_ns.rc!=0
+  args:
+    creates: kube-flannel.yml
 
+#- name: check for CNI flannel being applied already
+#  command: kubectl get ns kube-flannel
+#  failed_when: false
+#  register: flannel_ns
 - name: install Pod network
   become_user: ubuntu
   shell: 
     cmd: kubectl apply -f kube-flannel.yml >> kube-flannel.log
-  args:
-    creates: kube-flannel.log
+#  when: flannel_ns.rc!=0
 
 # remove default taint on control plane node that disallows workloads on it
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation
