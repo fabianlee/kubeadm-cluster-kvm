@@ -35,11 +35,24 @@
     creates: kube-flannel.yml
 
 - name: install Pod network
-  become_user: ubuntu
+  become: true
   shell: 
     cmd: kubectl apply -f kube-flannel.yml >> kube-flannel.log
   args:
     creates: kube-flannel.log
+
+# handle taints on control plane node, allow it to be treated like other workers
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation
+- name: remove taint from control plane, so pods can be scheduled on it
+  become_user: ubuntu
+  command:
+    cmd: kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+  failed_when: false # does not fail when taint does not exist on subsequent runs, idempotency
+# https://kubernetes.io/docs/reference/labels-annotations-taints/#node-kubernetes-io-exclude-from-external-load-balancers
+#- name: remove taint from control plane, so pods can be scheduled on it
+#  become_user: ubuntu
+#  command:
+#    cmd: kubectl taint nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
 
 - name: is metricsBindAddress set to 0.0.0.0
   become_user: ubuntu
