@@ -18,7 +18,7 @@ menu_items=(
   "ansibleping,Verify that ansible can reach guest VMS"
   "ssh,Manual ssh into guest VMs"
   ""
-  "kubeadm-prep,Prepare guest VMs for kubeadm install"
+  "kubeadm-prereq,Prepare guest VMs for kubeadm install"
   "kubeadm-control,Install kubedm control plane"
   "kubeadm-workers,Have workers join kubeadm cluster"
   ""
@@ -199,9 +199,9 @@ while [ 1 == 1 ]; do
       ;;
 
 
-    kubeadm-prep)
+    kubeadm-prereq)
       set -x
-      ansible-playbook playbook_kubeadm_prep.yml
+      ansible-playbook playbook_kubeadm_prereq.yml
       retVal=$?
       set +x 
 

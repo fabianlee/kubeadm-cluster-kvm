@@ -44,8 +44,7 @@
       - gnupg2
       - gnupg-agent
       - software-properties-common
-      # for group evaluation
-      - members
+      - members # for group evaluation
     state: present
     #update_cache: yes
 
@@ -139,6 +138,29 @@
 
 - name: CONTAINERD BLOCK
   block:
+
+    # The Docker apt repository does conveniently contain the 'containerd.io' package
+    # which is one method of installing Containerd on Ubuntu22
+    # https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/install-containerd-on-ubuntu-22-04.html
+
+    # save ASCII-armored gpg key locally
+    - name: get key for download.docker.com apt repo
+      shell:
+        cmd: curl -fsSL curl -fsSL https://download.docker.com/linux/ubuntu/gpg > /usr/share/keyrings/download.docker.com.asc
+    - name: chmod of keyring
+      command:
+        cmd: chmod 0644 /usr/share/keyrings/download.docker.com.asc
+
+    # add custom apt repo with 'signed-by' referring to gpg key
+    - name: add download.docker.com apt repository
+      apt_repository:
+        # 'lsb_release -cs' is ansible_distribution_release
+        repo: deb [signed-by=/usr/share/keyrings/download.docker.com.asc] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+        filename: download.docker.com
+        update_cache: yes
+        mode: 0644
+        validate_certs: false
 
     - name: install containerd packages
       package:
