@@ -10,7 +10,7 @@ apply: init libvirt-prereq
 init: create-keypair
 	$(TF) init
 
-destroy:
+destroy: virsh-snapshot-delete
 	$(TF) destroy -auto-approve
 	./clean-known-hosts.sh
 	#rm terraform.tfstate*
@@ -43,26 +43,19 @@ libvirt-pool:
 validate-cloud-config:
 	cloud-init devel schema --config-file cloud_init.cfg
 
-virsh-create-snapshot:
+virsh-snapshot-create: virsh-stop-all
+	sleep 5
 	virsh snapshot-create-as control1-192.168.122.217 --name adv-test
 	virsh snapshot-create-as worker1-192.168.122.218 --name adv-test
 	virsh snapshot-create-as worker2-192.168.122.219 --name adv-test
 
-## reverting by doing internal snapshot deletion
-virsh-snapshot-delete:
-	virsh destroy control1-192.168.122.217
-	virsh destroy worker1-192.168.122.218
-	virsh destroy worker2-192.168.122.219
+virsh-snapshot-delete: virsh-stop-all
 	sleep 5
 	virsh snapshot-delete control1-192.168.122.217 adv-test
 	virsh snapshot-delete worker1-192.168.122.218 adv-test
 	virsh snapshot-delete worker2-192.168.122.219 adv-test
 
-virsh-snapshot-revert:
-	echo "Stopping all VMs, reverting snapshot..."
-	virsh destroy control1-192.168.122.217 || true
-	virsh destroy worker1-192.168.122.218 || true
-	virsh destroy worker2-192.168.122.219 || true
+virsh-snapshot-revert: virsh-stop-all
 	sleep 5
 	virsh snapshot-revert control1-192.168.122.217 --snapshotname adv-test
 	virsh snapshot-revert worker1-192.168.122.218 --snapshotname adv-test
@@ -72,10 +65,12 @@ virsh-snapshot-revert:
 	virsh start worker2-192.168.122.219 || true
 
 virsh-start-all:
+	echo "Starting all VMs..."
 	virsh start control1-192.168.122.217 || true
 	virsh start worker1-192.168.122.218 || true
 	virsh start worker2-192.168.122.219 || true
 virsh-stop-all:
+	echo "Stopping all VMs..."
 	virsh destroy control1-192.168.122.217 || true
 	virsh destroy worker1-192.168.122.218 || true
 	virsh destroy worker2-192.168.122.219 || true
