@@ -3,14 +3,14 @@
 - name: increase cpu resources for etc
   replace:
     path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'cpu: 100m' # 100m
+    regexp:  'cpu: 100m'
     replace: 'cpu: 2000m'
   register: cpu_modification
 - debug: msg="{{cpu_modification}}"
 - name: increase mem resources for etc
   replace:
     path: /etc/kubernetes/manifests/etcd.yaml
-    regexp:  'memory: 100Mi' #100Mi
+    regexp:  'memory: 100Mi'
     replace: 'memory: 2000Mi'
   register: memory_modification
 - debug: msg="{{memory_modification}}"
@@ -27,8 +27,8 @@
     - 2380
   when: cpu_modification.changed or memory_modification.changed
 
-# additional wait for filesystem etcd config changes to be picked up
-- pause:
+- name: additional wait for filesystem etcd config changes to be picked up
+  pause:
     seconds: 30
   when: cpu_modification.changed or memory_modification.changed
 
