@@ -5,6 +5,9 @@
   become: no
   tasks:
 
+    # needed for community.general
+    # https://github.com/ansible-collections/community.digitalocean/issues/132
+    # pip3 install 'resolvelib<0.6.0' --user
     - name: install required pip3 dependencies for ansible galaxy kubernetes modules
       become: yes
       pip:
@@ -12,6 +15,7 @@
         - kubernetes
         - openshift
         - pyyaml
+        - 'resolvelib<0.6.0'
         executable: pip3
 
     # https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters_ipaddr.html
@@ -21,7 +25,7 @@
       become: yes
       apt:
         pkg:
-        - python-netaddr
+        #- python-netaddr # < Ubuntu22
         - python3-netaddr
         state: present
 
@@ -35,6 +39,4 @@
         - python3-libvirt
         - python3-lxml
         state: present
-
-
 

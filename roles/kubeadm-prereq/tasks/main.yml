@@ -179,6 +179,8 @@
       community.general.modprobe:
         name: "{{item}}"
         state: present
+        persistent: present # only supported in later versions of community.general
+      register: kernel_modules
       loop:
         - overlay
         - br_netfilter
@@ -194,5 +196,11 @@
       loop:
         - net.bridge.bridge-nf-call-ip6tables
         - net.bridge.bridge-nf-call-iptables
+
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/reboot_module.html
+    - name: reboot in order for kernel modules to be loaded correctly
+      reboot:
+        reboot_timeout: 300 # max seconds to wait for host to be back
+      when: kernel_modules.changed
 
   when: use_containerd

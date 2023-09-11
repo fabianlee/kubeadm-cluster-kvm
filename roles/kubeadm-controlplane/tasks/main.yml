@@ -5,9 +5,9 @@
     src: kubeadm.init.yaml
     dest: /root/.
 
-- name: check if kubelet systemd service exists
+- name: check if kubelet systemd service is running with good status
   command:
-    cmd: systemctl status kubelet
+    cmd: systemctl is-active kubelet
   register: kubelet_service
 
   failed_when: false

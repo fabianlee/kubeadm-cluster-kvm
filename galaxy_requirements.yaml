@@ -1,26 +1,34 @@
 ---
+#roles:
+#  - name: xxxx
+#    version: "x.y.z"
 collections:
 
   # https://galaxy.ansible.com/community/kubernetes
   # https://github.com/ansible-collections/community.kubernetes
   - name: community.kubernetes
     version: 2.0.1
+    source: https://galaxy.ansible.com
 
   # for creating CA and certificates
   # https://galaxy.ansible.com/community/crypto
   - name: community.crypto
     version: 2.2.1
+    source: https://galaxy.ansible.com
 
   # https://galaxy.ansible.com/ansible/netcommon
   - name: ansible.netcommon
     version: 2.2.0
+    source: https://galaxy.ansible.com
 
-  # pam_limits
+  # pam_limits, modprobe kernel module
   # https://galaxy.ansible.com/community/general
   - name: community.general
-    version: 3.4.0
+    version: 7.3.0 #3.4.0
+    source: https://galaxy.ansible.com
 
   # local libvirt
   - name: community.libvirt
     version: 1.0.2
+    source: https://galaxy.ansible.com
 

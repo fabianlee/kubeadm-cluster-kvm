@@ -13,7 +13,7 @@ init: create-keypair
 destroy: virsh-snapshot-delete
 	$(TF) destroy -auto-approve
 	./clean-known-hosts.sh
-	#rm terraform.tfstate*
+	rm -fr *tfstate* .terraform.lock.hcl
 
 ## create public/private keypair for ssh
 create-keypair:
@@ -51,9 +51,9 @@ virsh-snapshot-create: virsh-stop-all
 
 virsh-snapshot-delete: virsh-stop-all
 	sleep 5
-	virsh snapshot-delete control1-192.168.122.217 adv-test
-	virsh snapshot-delete worker1-192.168.122.218 adv-test
-	virsh snapshot-delete worker2-192.168.122.219 adv-test
+	virsh snapshot-delete control1-192.168.122.217 adv-test || true
+	virsh snapshot-delete worker1-192.168.122.218 adv-test || true
+	virsh snapshot-delete worker2-192.168.122.219 adv-test || true
 
 virsh-snapshot-revert: virsh-stop-all
 	sleep 5
