@@ -32,6 +32,7 @@ menu_items=(
   "nfs-host,Create /data/nfs1 on Ansible orchestrator host"
   "nfs-sc,Install nfs dynamic provisioner and StorageClass"
   ""
+  "metrics,metrics-server for aggregated API"
   "mailhog,Deploy in-cluster SMTP server for mail alerts"
   "prometheus,Deploy community kube-prometheus-stack with helm"
   "promadapter,Deploy Prometheus adapter that provides custom metrics"
@@ -287,6 +288,15 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    metrics)
+      set -x
+      ansible-playbook playbook_metrics_server.yaml
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
     mailhog)
       set -x
       ansible-playbook playbook_mailhog.yml
@@ -295,6 +305,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
+
     prometheus)
       set -x
       ansible-playbook playbook_prometheus_helm.yml

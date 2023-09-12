@@ -1,0 +1,32 @@
+# https://github.com/kubernetes-sigs/metrics-server
+---
+
+- name: does metrics-server exist
+  command:
+    cmd: kubectl get deployment metrics-server -n kube-system
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: metrics
+  failed_when: false
+
+- name: deploy metrics-server
+  command:
+    cmd: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: kapply
+  when: metrics.rc!=0
+
+- name: get args for metrics-server
+  command:
+    cmd: kubectl get deployment -n kube-system metrics-server -o yaml
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  register: metrics_server_args
+  
+- name: patch for TLS SAN names, else x509 errors from metrics-sever
+  command:
+    cmd: "kubectl -n kube-system patch deployment metrics-server --type=json -p='[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args/-\", \"value\": \"--kubelet-insecure-tls\"}]'"
+  environment:
+    KUBECONFIG: "{{kubeconfig}}"
+  when: not "kubelet-insecure-tls" in metrics_server_args.stdout
