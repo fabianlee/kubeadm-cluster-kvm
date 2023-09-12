@@ -23,7 +23,8 @@
   environment:
     KUBECONFIG: "{{kubeconfig}}"
   register: metrics_server_args
-  
+ 
+# https://stackoverflow.com/questions/49860181/how-do-i-update-the-args-for-a-kubernetes-deployment
 - name: patch for TLS SAN names, else x509 errors from metrics-sever
   command:
     cmd: "kubectl -n kube-system patch deployment metrics-server --type=json -p='[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args/-\", \"value\": \"--kubelet-insecure-tls\"}]'"
