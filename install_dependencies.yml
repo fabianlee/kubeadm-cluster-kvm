@@ -34,7 +34,7 @@
         - python-netaddr # older Ubuntu version
         state: present
       failed_when: false
-      when: ansible_distribution_version is version('18.10', '<=')
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version is version('18.10', '<=')
 
     # https://docs.ansible.com/ansible/latest/collections/community/libvirt/virt_net_module.html
     # required for 'community.libvirt' collection to work
