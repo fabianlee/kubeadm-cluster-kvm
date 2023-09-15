@@ -59,7 +59,6 @@
     # instead of setting each value, now going to use values file (which also includes complex custom rule)
     #
     cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --set prometheus.url=http://{{service_name}}.{{service_ns}}.svc --set prometheus.port={{service_port}} --values=./helm-values.yaml
-    #cmd: helm {{ "upgrade" if helm_info.status is defined else "install" }} adapter-release prometheus-community/prometheus-adapter --namespace={{service_ns}} --values=./helm-values.yaml
   environment:
     KUBECONFIG: "{{kubeconfig}}"
   register: helm_cmd

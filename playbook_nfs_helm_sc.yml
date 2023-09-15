@@ -14,22 +14,21 @@
 
   tasks:
 
-    # helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+    # helm repo add nfs https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
     # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html#ansible-collections-kubernetes-core-helm-module
     - name: Add nfs subdir helm3 repo
       kubernetes.core.helm_repository:
-        name: nfs-subdir-external-provisioner
+        name: nfs
         repo_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
 
-    #helm install nfs-subdir-external-provisioner \
-    #nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+    #helm install nfs-subdir-external-provisioner nfs/nfs-subdir-external-provisioner \
     #--set nfs.server=<IP> \
     #--set nfs.path=/data/nfs1 \
     #--set storageClass.onDelete=true
     - name: Deploy nfs subdir provisioner
       kubernetes.core.helm:
-        name: nfs-subdir-external-provisioner
-        chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+        name: nfs
+        chart_ref: nfs/nfs-subdir-external-provisioner
         wait: false
         values:
           nfs:
